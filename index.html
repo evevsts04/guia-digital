@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guia Digital | Letramento Moderno</title>
     
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+    <!-- PDF.js na versão mais estável para navegadores -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
@@ -37,7 +38,7 @@
 
     <header class="bg-white border-b border-slate-200 p-4 sticky top-0 z-20 shadow-sm">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="currentView='modules'; render();">
                 <div class="bg-gradient-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl shadow-md"><i class="ph-graduation-cap text-white text-2xl"></i></div>
                 <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-800 to-blue-600 hidden sm:block">Guia Digital</h1>
             </div>
@@ -55,7 +56,6 @@
     </header>
 
     <div id="app" class="max-w-6xl mx-auto px-4 py-10"></div>
-
     <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <!-- Modal Senha do Professor -->
@@ -85,10 +85,10 @@
                 </div>
             </div>
             <p class="text-slate-600 text-sm mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                Insira sua chave API para permitir a geração automática de aulas e quizzes interativos.
+                Insira sua chave API para permitir a geração automática de aulas e quizzes interativos a partir do texto extraído.
             </p>
             <input type="password" id="apiKeyInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none mb-2 font-mono text-sm" placeholder="AIzaSyA...">
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline mb-6 inline-flex items-center gap-1 font-medium"><i class="ph-link"></i> Obter chave gratuita</a>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline mb-6 inline-flex items-center gap-1 font-medium"><i class="ph-link"></i> Obter chave gratuita do Gemini</a>
             
             <div class="flex gap-3 mt-4">
                 <button onclick="closeSettings()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
@@ -116,24 +116,26 @@
                 </div>
             </div>
 
+            <!-- Área da IA e PDF -->
             <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 mb-8">
-                <h3 class="font-bold text-indigo-900 flex items-center gap-2 mb-4 text-lg"><i class="ph-magic-wand text-2xl"></i> Assistente de IA</h3>
+                <h3 class="font-bold text-indigo-900 flex items-center gap-2 mb-4 text-lg"><i class="ph-magic-wand text-2xl"></i> Preparação com IA & Material de Apoio</h3>
                 
                 <div id="dropArea" class="file-upload-area bg-white rounded-xl p-8 text-center cursor-pointer mb-4 shadow-sm group">
-                    <input type="file" id="fileInput" accept=".pdf,.docx" class="hidden">
+                    <input type="file" id="fileInput" accept=".pdf" class="hidden">
                     <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                         <i class="ph-file-pdf text-3xl text-indigo-600"></i>
                     </div>
-                    <p class="text-slate-700 font-bold text-lg">Extrair texto e Anexar PDF</p>
-                    <p class="text-sm text-slate-500 mt-1">Clique ou arraste o arquivo aqui</p>
+                    <p class="text-slate-700 font-bold text-lg">Clique ou Arraste o arquivo PDF aqui</p>
+                    <p class="text-sm text-slate-500 mt-1">Nós leremos o texto para a IA e anexaremos o arquivo original para o aluno.</p>
                 </div>
                 
                 <div id="pdfAttachmentContainer" class="hidden flex items-center justify-between bg-white border border-indigo-200 p-4 rounded-xl mb-4 shadow-sm">
                     <div class="flex items-center gap-3 text-indigo-900 font-semibold truncate">
-                        <i class="ph-check-circle text-emerald-500 text-2xl"></i>
+                        <i class="ph-check-circle text-emerald-500 text-2xl flex-shrink-0"></i>
                         <span id="attachedPdfName" class="truncate max-w-[200px] md:max-w-[400px]">arquivo.pdf</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md ml-2 flex-shrink-0 hidden sm:inline-block">Será exibido na tela do aluno</span>
                     </div>
-                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all"><i class="ph-trash text-xl"></i></button>
+                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all flex-shrink-0"><i class="ph-trash text-xl"></i></button>
                 </div>
 
                 <div id="quizBadgeContainer" class="hidden mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex justify-between items-center">
@@ -144,18 +146,15 @@
                     <span class="text-xs font-bold bg-emerald-200 text-emerald-800 px-2 py-1 rounded-md" id="quizCountBadge">4 perguntas</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4 mt-6">
                     <button id="btnGenerateAll" onclick="generateAI('completo')" class="bg-indigo-600 text-white py-3.5 px-4 rounded-xl hover:bg-indigo-700 transition-all font-bold flex items-center justify-center gap-2 shadow-md">
-                        <i class="ph-sparkles"></i> Gerar Aula + Quiz Interativo
-                    </button>
-                    <button id="btnGenerateQuiz" onclick="generateAI('quiz')" class="bg-slate-800 text-white py-3.5 px-4 rounded-xl hover:bg-slate-700 transition-all font-bold flex items-center justify-center gap-2 shadow-md">
-                        <i class="ph-list-checks"></i> Gerar apenas Quiz
+                        <i class="ph-sparkles text-xl"></i> Gerar Aula + Desafios + Quiz com IA
                     </button>
                 </div>
             </div>
 
-            <label class="block text-sm font-bold text-slate-700 mb-2">Conteúdo da Aula (Markdown)</label>
-            <textarea id="editContent" class="w-full h-96 p-5 border border-slate-300 rounded-2xl mb-8 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm shadow-inner bg-slate-50" placeholder="Texto base gerado ou extraído..."></textarea>
+            <label class="block text-sm font-bold text-slate-700 mb-2">Conteúdo Base da Aula (O que a IA vai ler e formatar)</label>
+            <textarea id="editContent" class="w-full h-80 p-5 border border-slate-300 rounded-2xl mb-8 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm shadow-inner bg-slate-50" placeholder="O texto extraído do PDF aparecerá aqui. Você também pode digitar manualmente para a IA usar como base..."></textarea>
             
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button onclick="closeModal()" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
@@ -167,11 +166,6 @@
     </div>
 
     <script>
-        // Configuração PDF.js Global Segura
-        if (window.pdfjsLib) {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
-
         // Variáveis de Estado
         let isProfessor = false;
         let currentView = 'modules';
@@ -182,12 +176,13 @@
         // Variáveis Temporárias de Edição
         let tempPdfData = null;
         let tempPdfName = null;
-        let tempQuizData = null; // Guarda o array JSON do quiz
+        let tempQuizData = null;
 
         // Estado do Quiz Interativo durante o uso
         let activeQuizData = null;
         let activeQuizState = {}; 
 
+        // Dados base (Se o usuário não tiver nada salvo)
         const defaultData = [
             { 
                 id: 'win11', title: 'Windows 11 Descomplicado', desc: 'Domine o sistema e aumente sua produtividade.', 
@@ -196,32 +191,27 @@
                 quizData: [
                     {
                         pergunta: "Qual é a principal função visual nova do Menu Iniciar no Windows 11?",
-                        opcoes: ["Ele foi removido", "Ele agora fica centralizado na barra de tarefas", "Ele é ativado apenas por voz", "Ele ocupa a tela inteira por padrão"],
+                        opcoes: ["Ele foi removido", "Ele agora fica centralizado", "Ele é ativado por voz", "Ocupa a tela inteira"],
                         correta: 1,
-                        justificativa: "Para facilitar o acesso em monitores grandes, a Microsoft centralizou o botão Iniciar e os ícones da barra de tarefas."
-                    },
-                    {
-                        pergunta: "O que o recurso 'Snap Layouts' permite fazer?",
-                        opcoes: ["Tirar fotos da tela (Print Screen)", "Desinstalar programas inúteis", "Organizar rapidamente várias janelas abertas em uma grade na tela", "Alterar o papel de parede automaticamente"],
-                        correta: 2,
-                        justificativa: "Ao passar o mouse sobre o botão de maximizar, o Snap Layouts sugere grades perfeitas para dividir a tela entre seus apps."
+                        justificativa: "A Microsoft centralizou o botão Iniciar para facilitar o acesso em monitores grandes."
                     }
                 ]
             },
-            { id: 'office', title: 'Pacote Office Essencial', desc: 'Word, Excel e PowerPoint para o dia a dia.', icon: 'ph-microsoft-excel-logo', color: 'from-green-500 to-emerald-600', content: '## Pacote Office\n\nConteúdo em construção.' },
-            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis pelo celular ou PC.', icon: 'ph-video', color: 'from-zinc-700 to-black', content: '## CapCut Essencial\n\nConteúdo em construção.' },
-            { id: 'ia', title: 'Mundo da Inteligência Artificial', desc: 'Aprenda a usar ChatGPT e Gemini a seu favor.', icon: 'ph-robot', color: 'from-purple-500 to-pink-600', content: '## Inteligência Artificial\n\nConteúdo em construção.' }
+            { id: 'office', title: 'Pacote Office Essencial', desc: 'Word, Excel e PowerPoint.', icon: 'ph-microsoft-excel-logo', color: 'from-green-500 to-emerald-600', content: '## Pacote Office\n\nEm construção.' },
+            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis.', icon: 'ph-video', color: 'from-zinc-700 to-black', content: '## CapCut Essencial\n\nEm construção.' },
+            { id: 'ia', title: 'Inteligência Artificial', desc: 'Aprenda a usar IA a seu favor.', icon: 'ph-robot', color: 'from-purple-500 to-pink-600', content: '## Inteligência Artificial\n\nEm construção.' }
         ];
 
-        let modules = JSON.parse(localStorage.getItem('guia_modules_data_v2')) || defaultData;
+        let modules = JSON.parse(localStorage.getItem('guia_modules_data_v3')) || defaultData;
 
         function saveData() {
             try {
-                localStorage.setItem('guia_modules_data_v2', JSON.stringify(modules));
+                // Tenta salvar no navegador (Limite costuma ser ~5MB)
+                localStorage.setItem('guia_modules_data_v3', JSON.stringify(modules));
                 return true;
             } catch (e) {
                 console.error(e);
-                showToast("Erro ao salvar! Se anexou um PDF, ele pode ser grande demais para o navegador.", "error");
+                showToast("Erro ao salvar! O arquivo PDF é muito pesado para o armazenamento do navegador (Limite ~4MB). Tente um arquivo menor.", "error");
                 return false;
             }
         }
@@ -237,7 +227,7 @@
             
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
+            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 5000);
         }
 
         function toggleProfessorMode() {
@@ -246,18 +236,13 @@
                 document.getElementById('authModal').classList.remove('hidden');
                 setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
             } else {
-                isProfessor = false;
-                applyModeUI();
-                showToast("Modo Aluno ativado.", "info");
+                isProfessor = false; applyModeUI(); showToast("Modo Aluno ativado.", "info");
             }
         }
 
         function attemptLogin() {
             if (document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
-                isProfessor = true;
-                closeAuthModal();
-                applyModeUI();
-                showToast("Modo Administrador ativado!", "success");
+                isProfessor = true; closeAuthModal(); applyModeUI(); showToast("Modo Professor ativado!", "success");
             } else {
                 showToast("Senha incorreta!", "error");
             }
@@ -275,7 +260,6 @@
 
         function applyModeUI() {
             const btn = document.getElementById('modeToggle');
-            const btnText = document.getElementById('modeText');
             const settingsBtn = document.getElementById('settingsBtn');
 
             if (isProfessor) {
@@ -291,14 +275,15 @@
         }
 
         async function callGeminiAPI(promptText) {
-            if (!apiKey) { showToast("Chave IA não configurada.", "error"); openSettings(); return null; }
+            if (!apiKey) { showToast("A IA não está configurada. Clique na Engrenagem no topo.", "error"); openSettings(); return null; }
+            // Modelo correto e atualizado do Google
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             try {
                 const response = await fetch(url, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } })
                 });
-                if (!response.ok) throw new Error("Erro na requisição. Verifique sua chave.");
+                if (!response.ok) throw new Error("Erro na requisição. Verifique sua chave API.");
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
             } catch (e) { showToast(e.message, "error"); return null; }
@@ -306,50 +291,38 @@
 
         async function generateAI(tipo) {
             const material = document.getElementById('editContent').value.trim();
-            if (material.length < 50) { showToast("Insira mais texto base ou anexe um PDF.", "error"); return; }
+            if (material.length < 50) { showToast("Você precisa anexar um PDF ou digitar algum texto base para a IA analisar.", "error"); return; }
 
-            const btn = document.getElementById(tipo === 'completo' ? 'btnGenerateAll' : 'btnGenerateQuiz');
+            const btn = document.getElementById('btnGenerateAll');
             const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<div class="loading-spinner"></div> Gerando...`; btn.disabled = true;
+            btn.innerHTML = `<div class="loading-spinner"></div> A IA está processando o conteúdo... (Aguarde)`; btn.disabled = true;
 
-            let prompt = "";
-            if (tipo === 'completo') {
-                prompt = `Você é um Designer Instrucional. Analise o texto e crie o material OBRIGATORIAMENTE usando estas tags:
+            const prompt = `Você é um Professor Digital Especialista. Analise o texto base e crie o material OBRIGATORIAMENTE usando estas tags EXATAS:
 
 [CONTEUDO_MARKDOWN]
 ## 📚 Resumo da Aula
-(tópicos claros e diretos)
+(tópicos claros, bonitos e diretos baseados no texto)
 ## 🎯 Desafios Práticos
-(2 desafios aplicáveis)
+(crie 2 ou 3 desafios aplicáveis e interessantes baseados no assunto)
 [/CONTEUDO_MARKDOWN]
 
 [QUIZ_JSON]
 [
-  {"pergunta": "Questão 1?", "opcoes": ["A", "B", "C", "D"], "correta": 0, "justificativa": "Motivo da resposta."}
+  {"pergunta": "Questão 1 sobre o texto?", "opcoes": ["A", "B", "C", "D"], "correta": 0, "justificativa": "Motivo educativo e claro da resposta."},
+  {"pergunta": "Questão 2?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "Motivo..."}
 ]
 [/QUIZ_JSON]
 
 Texto base: ${material}`;
-            } else {
-                prompt = `Crie um quiz baseado no texto. Retorne OBRIGATORIAMENTE APENAS o JSON dentro das tags:
-[QUIZ_JSON]
-[ {"pergunta": "...", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "..."} ]
-[/QUIZ_JSON]
-Texto: ${material}`;
-            }
 
             const res = await callGeminiAPI(prompt);
             if (res) {
-                // Parse Content
-                if (tipo === 'completo') {
-                    const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
-                    const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
-                    if (mdStart > 18 && mdEnd !== -1) {
-                        document.getElementById('editContent').value = res.substring(mdStart, mdEnd).trim();
-                    }
+                const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
+                const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
+                if (mdStart > 18 && mdEnd !== -1) {
+                    document.getElementById('editContent').value = res.substring(mdStart, mdEnd).trim();
                 }
                 
-                // Parse JSON Quiz
                 const jStart = res.indexOf('[QUIZ_JSON]') + 11;
                 const jEnd = res.indexOf('[/QUIZ_JSON]');
                 if (jStart > 10 && jEnd !== -1) {
@@ -357,9 +330,9 @@ Texto: ${material}`;
                         let rawJson = res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim();
                         tempQuizData = JSON.parse(rawJson);
                         updateQuizBadge();
-                        showToast("Quiz interativo gerado com sucesso! ✨", "success");
+                        showToast("Magia Feita! Aula, Desafios e Quiz gerados com sucesso!", "success");
                     } catch (e) {
-                        console.error(e); showToast("Erro ao ler o formato do Quiz gerado pela IA.", "error");
+                        console.error(e); showToast("Erro ao processar o formato do Quiz da IA.", "error");
                     }
                 }
             }
@@ -369,31 +342,91 @@ Texto: ${material}`;
         function setupFileExtraction() {
             const dropArea = document.getElementById('dropArea');
             const fileInput = document.getElementById('fileInput');
-            dropArea.onclick = () => fileInput.click();
-            fileInput.onchange = (e) => { if (e.target.files.length) processFile(e.target.files[0]); };
+            
+            // Clonamos e substituimos para remover listeners antigos (previne disparo duplo)
+            const newDropArea = dropArea.cloneNode(true);
+            dropArea.parentNode.replaceChild(newDropArea, dropArea);
+            const newFileInput = newDropArea.querySelector('#fileInput');
+            
+            newDropArea.onclick = () => newFileInput.click();
+            
+            newDropArea.addEventListener('dragover', (e) => { e.preventDefault(); newDropArea.classList.add('border-indigo-600', 'bg-indigo-50'); });
+            newDropArea.addEventListener('dragleave', (e) => { e.preventDefault(); newDropArea.classList.remove('border-indigo-600', 'bg-indigo-50'); });
+            newDropArea.addEventListener('drop', (e) => {
+                e.preventDefault(); newDropArea.classList.remove('border-indigo-600', 'bg-indigo-50');
+                if (e.dataTransfer.files.length) { newFileInput.files = e.dataTransfer.files; processFile(e.dataTransfer.files[0]); }
+            });
+
+            newFileInput.onchange = (e) => { if (e.target.files.length) processFile(e.target.files[0]); };
         }
 
         async function processFile(file) {
-            showToast("Lendo documento... Aguarde.", "info");
+            showToast("Anexando e Lendo o PDF... Aguarde.", "info");
+            
             try {
-                let text = '';
-                if (file.type === 'application/pdf') {
-                    if (!window.pdfjsLib) throw new Error("Leitor de PDF não carregou. Recarregue a página.");
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        text += content.items.map(item => item.str).join(' ') + '\n\n';
+                // Passo 1: Lê o arquivo em Base64 IMEDIATAMENTE. 
+                // Mesmo que a extração de texto falhe, o PDF estará salvo para visualização.
+                const reader = new FileReader();
+                reader.onload = async (e) => { 
+                    tempPdfData = e.target.result; 
+                    tempPdfName = file.name; 
+                    updatePdfAttachmentUI(); 
+                    
+                    // Passo 2: Tenta extrair o texto via PDF.js
+                    if (file.type === 'application/pdf') {
+                        try {
+                            if (window.pdfjsLib) {
+                                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                                const arrayBuffer = await file.arrayBuffer();
+                                const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                                let text = '';
+                                for (let i = 1; i <= pdf.numPages; i++) {
+                                    const page = await pdf.getPage(i);
+                                    const content = await page.getTextContent();
+                                    text += content.items.map(item => item.str).join(' ') + '\n\n';
+                                }
+                                if (text.trim().length > 0) {
+                                    document.getElementById('editContent').value = text.trim();
+                                    showToast("Arquivo anexado e texto extraído! Agora clique no botão da IA.", "success");
+                                } else {
+                                    showToast("Arquivo anexado! (Não conseguimos ler as letras pois parece ser uma imagem digitalizada)", "info");
+                                }
+                            } else {
+                                showToast("PDF Anexado! (Leitura automática de texto indisponível no momento)", "info");
+                            }
+                        } catch (extError) {
+                            console.error("A extração de texto falhou, mas o arquivo foi anexado:", extError);
+                            showToast("PDF Anexado! (Houve uma falha técnica ao ler o texto automaticamente).", "info");
+                        }
+                    } else {
+                        showToast("Arquivo anexado! Apenas PDFs suportam extração de texto automática.", "success");
                     }
-                    const reader = new FileReader();
-                    reader.onload = (e) => { tempPdfData = e.target.result; tempPdfName = file.name; updatePdfAttachmentUI(); };
-                    reader.readAsDataURL(file);
-                } else { throw new Error("Apenas PDFs suportados no momento."); }
+                };
+                reader.readAsDataURL(file);
+            } catch (e) { 
+                showToast("Erro inesperado ao processar o arquivo.", "error"); 
+                console.error(e); 
+            }
+            // Limpa o input para permitir enviar o mesmo arquivo de novo se necessário
+            document.getElementById('fileInput').value = '';
+        }
+
+        // Criador de Blob Seguro (Evita bloqueios do Chrome/Edge)
+        function getSafePdfUrl(base64Data) {
+            if (!base64Data || !base64Data.startsWith('data:')) return null;
+            try {
+                const base64 = base64Data.split(',')[1];
+                const byteString = atob(base64);
+                const arrayBuffer = new ArrayBuffer(byteString.length);
+                const int8Array = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < byteString.length; i++) int8Array[i] = byteString.charCodeAt(i);
                 
-                document.getElementById('editContent').value = text.trim();
-                showToast("Texto extraído! Agora clique em Gerar com IA.", "success");
-            } catch (e) { showToast(e.message, "error"); }
+                const blob = new Blob([int8Array], { type: 'application/pdf' });
+                return URL.createObjectURL(blob);
+            } catch (e) {
+                console.error("Erro na conversão segura do PDF", e);
+                return null;
+            }
         }
 
         function updatePdfAttachmentUI() {
@@ -424,7 +457,7 @@ Texto: ${material}`;
             
             document.getElementById('editTitle').value = mod.title;
             document.getElementById('editDesc').value = mod.desc;
-            document.getElementById('editContent').value = mod.content;
+            document.getElementById('editContent').value = mod.content || '';
             
             tempPdfData = mod.pdfData || null; tempPdfName = mod.pdfName || null;
             tempQuizData = mod.quizData || null;
@@ -440,7 +473,7 @@ Texto: ${material}`;
 
         function saveChanges() {
             const mod = modules.find(m => m.id === activeModuleId);
-            const backup = { ...mod };
+            const backup = { ...mod }; // Guarda os dados originais caso o salvamento falhe
 
             mod.title = document.getElementById('editTitle').value;
             mod.desc = document.getElementById('editDesc').value;
@@ -450,9 +483,10 @@ Texto: ${material}`;
             mod.quizData = tempQuizData;
 
             if (saveData()) {
-                closeModal(); render(); showToast("Módulo atualizado com sucesso!", "success");
+                closeModal(); render(); showToast("Aula atualizada e salva com sucesso!", "success");
             } else {
-                Object.assign(mod, backup); // rollback if failed
+                // Se der erro (ex: PDF muito grande para o LocalStorage), reverte as alterações
+                Object.assign(mod, backup); 
             }
         }
 
@@ -472,53 +506,40 @@ Texto: ${material}`;
                 if (answered) borderClass = isCorrect ? 'border-emerald-500 bg-emerald-50/30' : 'border-red-500 bg-red-50/30';
 
                 html += `<div class="bg-white p-6 md:p-8 rounded-3xl border-2 ${borderClass} shadow-sm transition-all animate-fade-in relative overflow-hidden">`;
-                
-                // Question text
                 html += `<h4 class="text-xl font-bold text-slate-800 mb-6 flex gap-3"><span class="text-indigo-500">${qIndex + 1}.</span> ${q.pergunta}</h4>`;
                 html += `<div class="space-y-3">`;
 
-                // Options
                 q.opcoes.forEach((opt, optIndex) => {
                     const isSelected = state.selected === optIndex;
                     const isActuallyCorrect = q.correta === optIndex;
-
                     let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center group ";
 
                     if (!answered) {
                         btnClass += "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 cursor-pointer font-medium";
                     } else {
                         btnClass += "cursor-default ";
-                        if (isActuallyCorrect) {
-                            btnClass += "bg-emerald-500 border-emerald-500 text-white font-bold shadow-md transform scale-[1.02]";
-                        } else if (isSelected && !isCorrect) {
-                            btnClass += "bg-red-50 border-red-500 text-red-800 font-bold";
-                        } else {
-                            btnClass += "border-slate-100 text-slate-400 opacity-60";
-                        }
+                        if (isActuallyCorrect) btnClass += "bg-emerald-500 border-emerald-500 text-white font-bold shadow-md transform scale-[1.02]";
+                        else if (isSelected && !isCorrect) btnClass += "bg-red-50 border-red-500 text-red-800 font-bold";
+                        else btnClass += "border-slate-100 text-slate-400 opacity-60";
                     }
 
                     html += `<button ${!answered ? `onclick="answerQuestion(${qIndex}, ${optIndex})"` : 'disabled'} class="${btnClass}">`;
                     html += `<span>${opt}</span>`;
-                    
-                    if (!answered) {
-                        html += `<div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-400 flex-shrink-0"></div>`;
-                    } else {
+                    if (!answered) { html += `<div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-400 flex-shrink-0"></div>`; } 
+                    else {
                         if (isActuallyCorrect) html += `<i class="ph-check-circle text-2xl text-white"></i>`;
                         else if (isSelected && !isCorrect) html += `<i class="ph-x-circle text-2xl text-red-600"></i>`;
                     }
                     html += `</button>`;
                 });
-
                 html += `</div>`;
 
-                // Justification Box
                 if (answered) {
                     html += `<div class="mt-6 p-5 rounded-2xl ${isCorrect ? 'bg-emerald-100/50 border border-emerald-200 text-emerald-900' : 'bg-red-100/50 border border-red-200 text-red-900'} animate-fade-in flex gap-4 items-start">`;
                     html += `<i class="${isCorrect ? 'ph-check-circle text-emerald-600' : 'ph-info text-red-600'} text-3xl shrink-0"></i>`;
                     html += `<div><p class="font-bold text-lg mb-1">${isCorrect ? 'Excelente! Resposta Certa.' : 'Puxa, resposta incorreta.'}</p><p class="text-base leading-relaxed">${q.justificativa}</p></div>`;
                     html += `</div>`;
                 }
-
                 html += `</div>`;
             });
             html += '</div>';
@@ -530,59 +551,39 @@ Texto: ${material}`;
             renderQuizUI();
         }
 
-        // Criar URL segura para o PDF (contorna bloqueios de navegadores modernos)
-        function getSafePdfUrl(base64Data) {
-            if (!base64Data || !base64Data.startsWith('data:')) return base64Data;
-            try {
-                const base64 = base64Data.split(',')[1];
-                const byteString = atob(base64);
-                const arrayBuffer = new ArrayBuffer(byteString.length);
-                const int8Array = new Uint8Array(arrayBuffer);
-                for (let i = 0; i < byteString.length; i++) {
-                    int8Array[i] = byteString.charCodeAt(i);
-                }
-                const blob = new Blob([int8Array], { type: 'application/pdf' });
-                return URL.createObjectURL(blob);
-            } catch (e) {
-                console.error("Erro ao converter PDF", e);
-                return base64Data;
-            }
-        }
-
+        // Gera novos desafios pelo aluno
         async function generateNewPractice() {
-            if (!apiKey) { showToast("IA não configurada. Fale com o Professor.", "error"); return; }
+            if (!apiKey) { showToast("O Professor não habilitou a IA ainda.", "error"); return; }
             
             const btn = document.getElementById('btnPraticarMais');
             btn.innerHTML = `<div class="loading-spinner"></div> Criando desafios...`; btn.disabled = true;
 
             const mod = modules.find(m => m.id === activeModuleId);
-            const prompt = `Analise o texto e crie NOVOS desafios e um NOVO quiz inédito. Siga EXATAMENTE as tags:
+            const prompt = `Analise a aula e crie NOVOS desafios e um NOVO quiz inédito. Siga EXATAMENTE as tags:
 [CONTEUDO_MARKDOWN]
-## 🚀 Novos Desafios Práticos (Treino Extra)
+## 🚀 Novos Desafios Práticos (Criados por IA)
 (2 novos desafios)
 [/CONTEUDO_MARKDOWN]
 [QUIZ_JSON]
 [ {"pergunta": "Nova questao?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "..."} ]
 [/QUIZ_JSON]
-Texto: ${mod.content.substring(0, 3000)}`;
+Texto Base: ${mod.content.substring(0, 3000)}`;
 
             const res = await callGeminiAPI(prompt);
             if (res) {
                 const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
                 const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
-                if (mdStart > 18 && mdEnd !== -1) {
-                    document.getElementById('extraPracticeContent').innerHTML = marked.parse(res.substring(mdStart, mdEnd).trim());
-                }
+                if (mdStart > 18 && mdEnd !== -1) document.getElementById('extraPracticeContent').innerHTML = marked.parse(res.substring(mdStart, mdEnd).trim());
                 
                 const jStart = res.indexOf('[QUIZ_JSON]') + 11;
                 const jEnd = res.indexOf('[/QUIZ_JSON]');
                 if (jStart > 10 && jEnd !== -1) {
                     try {
                         activeQuizData = JSON.parse(res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim());
-                        activeQuizState = {}; // reseta estado
+                        activeQuizState = {}; 
                         renderQuizUI();
                         showToast("Novos exercícios gerados!", "success");
-                    } catch (e) { showToast("Erro ao processar novo quiz.", "error"); }
+                    } catch (e) {}
                 }
             }
             btn.innerHTML = `<i class="ph-arrows-clockwise text-xl"></i> Gerar Outro Treino (IA)`; btn.disabled = false;
@@ -591,11 +592,8 @@ Texto: ${mod.content.substring(0, 3000)}`;
         function openModule(id) {
             activeModuleId = id; currentView = 'module';
             const mod = modules.find(m => m.id === id);
-            
-            // Set up active quiz session
             activeQuizData = mod.quizData ? JSON.parse(JSON.stringify(mod.quizData)) : null;
             activeQuizState = {};
-            
             render();
         }
 
@@ -634,7 +632,7 @@ Texto: ${mod.content.substring(0, 3000)}`;
                 `;
             } else {
                 const mod = modules.find(m => m.id === activeModuleId);
-                const parsedContent = marked.parse(mod.content);
+                const parsedContent = marked.parse(mod.content || "Nenhum conteúdo disponível.");
                 const safePdfUrl = mod.pdfData ? getSafePdfUrl(mod.pdfData) : null;
                 
                 app.innerHTML = `
@@ -645,7 +643,6 @@ Texto: ${mod.content.substring(0, 3000)}`;
                     <div class="bg-white rounded-[2rem] border border-slate-200 card-shadow overflow-hidden">
                         <div class="bg-gradient-to-br ${mod.color} p-10 md:p-14 text-white relative overflow-hidden">
                             <div class="absolute -right-10 -bottom-10 opacity-20 transform rotate-12 pointer-events-none"><i class="${mod.icon} text-[15rem]"></i></div>
-                            
                             <div class="relative z-10">
                                 <div class="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/30 shadow-xl">
                                     <i class="${mod.icon} text-5xl"></i>
@@ -656,21 +653,42 @@ Texto: ${mod.content.substring(0, 3000)}`;
                         </div>
                         
                         <div class="p-8 md:p-14 bg-white module-content">
-                            <!-- Visualizador de PDF Seguro -->
+                            <!-- Visualizador de PDF Multi-Plataforma -->
                             ${safePdfUrl ? `
-                                <div class="mb-14 bg-slate-50 p-2 md:p-4 rounded-[2rem] border border-slate-200 shadow-inner">
-                                    <div class="flex items-center gap-3 mb-4 px-4 pt-2">
-                                        <div class="bg-red-500 p-2 rounded-lg text-white"><i class="ph-file-pdf text-xl"></i></div> 
-                                        <h3 class="!m-0 text-xl font-bold text-slate-800">Slides da Aula</h3>
+                                <div class="mb-14 bg-slate-50 p-3 md:p-5 rounded-[2rem] border border-slate-200 shadow-inner">
+                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 px-2">
+                                        <div class="flex items-center gap-3">
+                                            <div class="bg-red-500 p-2.5 rounded-xl text-white shadow-md"><i class="ph-file-pdf text-2xl"></i></div> 
+                                            <div>
+                                                <h3 class="!m-0 text-xl font-extrabold text-slate-800">Material Original (PDF)</h3>
+                                                <p class="text-sm text-slate-500 m-0">${mod.pdfName || 'Documento da Aula'}</p>
+                                            </div>
+                                        </div>
+                                        <a href="${safePdfUrl}" download="${mod.pdfName || 'Material_Guia_Digital'}.pdf" class="bg-white hover:bg-slate-100 text-slate-700 font-bold py-2.5 px-4 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2 transition-all text-sm w-full sm:w-auto justify-center">
+                                            <i class="ph-download-simple text-lg"></i> Baixar Arquivo
+                                        </a>
                                     </div>
-                                    <div class="rounded-3xl overflow-hidden shadow-md border border-slate-300">
-                                        <iframe src="${safePdfUrl}#toolbar=0&navpanes=0" class="w-full h-[600px] bg-slate-200" frameborder="0"></iframe>
+                                    
+                                    <!-- Fallback Seguro: Se a tag object falhar, mostra o iframe. Se ambos falharem, mostra o aviso. -->
+                                    <div class="rounded-2xl overflow-hidden shadow-md border border-slate-300 bg-slate-800 w-full" style="height: 65vh; min-height: 500px;">
+                                        <object data="${safePdfUrl}#view=FitH&toolbar=0" type="application/pdf" class="w-full h-full">
+                                            <iframe src="${safePdfUrl}#view=FitH&toolbar=0" class="w-full h-full border-0">
+                                                <div class="flex flex-col items-center justify-center h-full p-8 text-center text-white bg-slate-800">
+                                                    <i class="ph-warning-circle text-6xl mb-4 text-amber-400"></i>
+                                                    <h4 class="text-2xl font-bold mb-2">Visualização Bloqueada</h4>
+                                                    <p class="text-slate-300 mb-6 max-w-md">Seu navegador atual de celular/computador não permite visualizar o PDF diretamente nesta página.</p>
+                                                    <a href="${safePdfUrl}" download="${mod.pdfName || 'Material'}.pdf" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all flex items-center gap-3 text-lg">
+                                                        <i class="ph-download-simple text-2xl"></i> Clique aqui para Baixar o PDF
+                                                    </a>
+                                                </div>
+                                            </iframe>
+                                        </object>
                                     </div>
                                 </div>
                             ` : ''}
 
                             <!-- Conteúdo Markdown Base -->
-                            <div class="prose max-w-none">${parsedContent}</div>
+                            <div class="prose max-w-none mb-10">${parsedContent}</div>
                             
                             <!-- Área de Treino Extra -->
                             <div id="extraPracticeContent" class="mt-8 prose max-w-none"></div>
@@ -679,20 +697,20 @@ Texto: ${mod.content.substring(0, 3000)}`;
                             <div id="quizContainer"></div>
 
                             <!-- Botão de Prática Extra Aluno -->
-                            <div class="mt-12 pt-8 border-t border-slate-200 text-center">
-                                <div class="bg-indigo-50 rounded-3xl p-8 border border-indigo-100 max-w-2xl mx-auto">
-                                    <h4 class="text-xl font-bold text-indigo-900 mb-2">Quer testar seus conhecimentos?</h4>
-                                    <p class="text-indigo-700 mb-6">Nossa Inteligência Artificial pode criar um desafio inédito baseado nesta aula só para você.</p>
-                                    <button id="btnPraticarMais" onclick="generateNewPractice()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3 mx-auto w-full sm:w-auto">
-                                        <i class="ph-sparkles text-xl"></i> Praticar Mais com IA
+                            <div class="mt-16 pt-10 border-t border-slate-200 text-center">
+                                <div class="bg-indigo-50 rounded-[2rem] p-8 md:p-10 border border-indigo-100 max-w-3xl mx-auto relative overflow-hidden">
+                                    <div class="absolute -right-4 -top-4 opacity-10 text-indigo-500"><i class="ph-sparkles text-[10rem]"></i></div>
+                                    <h4 class="text-2xl font-bold text-indigo-900 mb-3 relative z-10">Desafie a Inteligência Artificial</h4>
+                                    <p class="text-indigo-700 mb-8 text-lg relative z-10">Nossa IA criará um desafio prático e um quiz inédito baseado exatamente no que você acabou de ler nesta aula.</p>
+                                    <button id="btnPraticarMais" onclick="generateNewPractice()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3 mx-auto w-full sm:w-auto relative z-10 text-lg">
+                                        <i class="ph-sparkles text-2xl"></i> Praticar Mais com IA
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
-                
-                if (activeQuizData) { renderQuizUI(); }
+                if (activeQuizData) renderQuizUI();
             }
         }
 
