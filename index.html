@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia Digital | Modo Professor Ativo</title>
+    <title>Guia Digital | Letramento Moderno</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
@@ -12,169 +12,162 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .transition-all { transition: all 0.2s ease-in-out; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); }
+        .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .module-content h2, .module-content h3 { color: #1e293b; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em; }
-        .module-content h2 { font-size: 1.5rem; }
-        .module-content h3 { font-size: 1.25rem; }
-        .module-content p { color: #475569; line-height: 1.7; margin-bottom: 1em; }
-        .module-content ul, .module-content ol { margin-left: 1.5em; margin-bottom: 1em; color: #475569; }
-        .module-content ul { list-style-type: disc; }
-        .module-content blockquote { border-left: 4px solid #6366f1; padding-left: 1em; font-style: italic; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 4px;}
-        .module-content strong { color: #334155; }
+        .module-content h2 { color: #1e293b; font-weight: 800; font-size: 1.8rem; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .module-content h3 { color: #334155; font-weight: 700; font-size: 1.4rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .module-content p { color: #475569; line-height: 1.8; margin-bottom: 1.25rem; font-size: 1.05rem; }
+        .module-content ul, .module-content ol { margin-left: 1.5rem; margin-bottom: 1.5rem; color: #475569; font-size: 1.05rem; }
+        .module-content ul li { list-style-type: none; position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+        .module-content ul li::before { content: "•"; color: #6366f1; font-weight: bold; position: absolute; left: 0; }
+        .module-content blockquote { border-left: 4px solid #6366f1; padding: 1rem 1.5rem; font-style: italic; color: #64748b; background: #f8fafc; border-radius: 0 8px 8px 0; margin-bottom: 1.5rem; }
         
         .file-upload-area { border: 2px dashed #cbd5e1; transition: all 0.2s ease; }
         .file-upload-area:hover, .file-upload-area.active { border-color: #6366f1; background-color: #f8fafc; }
         
-        .loading-spinner {
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
-    <header class="bg-white border-b border-slate-200 p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-600 p-2 rounded-lg"><i class="ph-book-open-text text-white text-xl"></i></div>
-            <h1 class="text-xl font-bold text-slate-800 hidden sm:block">Guia Digital</h1>
-        </div>
-        
-        <div class="flex items-center gap-3">
-            <!-- Botão de Configurações API (Aparece só no modo prof) -->
-            <button id="settingsBtn" onclick="openSettings()" class="hidden px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all border border-slate-300" title="Configurar IA">
-                <i class="ph-gear text-xl"></i> <span class="hidden sm:inline ml-1 font-medium text-sm">Configuração IA</span>
-            </button>
+    <header class="bg-white border-b border-slate-200 p-4 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl shadow-md"><i class="ph-graduation-cap text-white text-2xl"></i></div>
+                <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-800 to-blue-600 hidden sm:block">Guia Digital</h1>
+            </div>
             
-            <button id="modeToggle" onclick="toggleProfessorMode()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-all shadow-sm flex items-center gap-2">
-                <i class="ph-student"></i> <span id="modeText">Ver como Aluno</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <button id="settingsBtn" onclick="openSettings()" class="hidden px-3 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all border border-slate-300" title="Configurar IA">
+                    <i class="ph-gear text-xl"></i> <span class="hidden sm:inline ml-1 font-semibold text-sm">IA</span>
+                </button>
+                
+                <button id="modeToggle" onclick="toggleProfessorMode()" class="px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-semibold transition-all shadow-md flex items-center gap-2">
+                    <i class="ph-student text-lg"></i> <span id="modeText">Ver como Aluno</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Área Principal -->
-    <div id="app" class="max-w-6xl mx-auto px-4 py-8"></div>
+    <div id="app" class="max-w-6xl mx-auto px-4 py-10"></div>
 
-    <!-- Container de Notificações (Toasts) -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- Modal de Autenticação do Professor -->
-    <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-sm shadow-2xl transform transition-all">
-            <div class="flex items-center gap-3 mb-4 text-emerald-600">
-                <div class="bg-emerald-100 p-2 rounded-xl">
-                    <i class="ph-lock-key text-2xl"></i>
-                </div>
-                <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
+    <!-- Modal Senha do Professor -->
+    <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl animate-fade-in">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="bg-emerald-100 p-4 rounded-full text-emerald-600 mb-4 shadow-inner"><i class="ph-lock-key text-4xl"></i></div>
+                <h2 class="text-2xl font-bold text-slate-800">Acesso Restrito</h2>
+                <p class="text-slate-500 text-sm mt-2">Digite a senha para habilitar a edição.</p>
             </div>
-            
-            <p class="text-slate-600 text-sm mb-6">
-                Digite a senha de administrador para habilitar a edição.
-            </p>
-
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Senha do Professor</label>
-                <input type="password" id="adminPasswordInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" placeholder="••••••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
-                <p class="text-xs text-slate-500 mt-2">A senha padrão inicial é <strong>admin</strong></p>
-            </div>
-
+            <input type="password" id="adminPasswordInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center text-xl tracking-widest font-mono mb-4 shadow-inner" placeholder="••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
             <div class="flex gap-3">
-                <button onclick="closeAuthModal()" class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-all">Cancelar</button>
-                <button onclick="attemptLogin()" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-md flex justify-center items-center gap-2"><i class="ph-sign-in"></i> Entrar</button>
+                <button onclick="closeAuthModal()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
+                <button onclick="attemptLogin()" class="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md">Entrar</button>
             </div>
         </div>
     </div>
 
+    <!-- Modal de Configuração IA -->
     <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl transform transition-all">
-            <div class="flex items-center gap-3 mb-4 text-indigo-600">
-                <i class="ph-robot text-3xl"></i>
-                <h2 class="text-2xl font-bold text-slate-800">Inteligência Artificial</h2>
+        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl animate-fade-in">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="bg-indigo-100 p-3 rounded-2xl text-indigo-600"><i class="ph-robot text-3xl"></i></div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Cérebro da IA</h2>
+                    <p class="text-slate-500 text-sm">Google Gemini</p>
+                </div>
             </div>
-            
-            <p class="text-slate-600 text-sm mb-6">
-                Para usar a geração automática de conteúdo, insira sua chave da API do <strong>Google Gemini</strong>. O processamento é gratuito e ocorre direto no seu navegador.
+            <p class="text-slate-600 text-sm mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                Insira sua chave API para permitir a geração automática de aulas e quizzes interativos.
             </p>
-
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Sua Chave API (API Key)</label>
-                <input type="password" id="apiKeyInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="AIzaSyA...">
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline mt-2 inline-flex items-center gap-1">
-                    <i class="ph-link"></i> Obter uma chave gratuitamente
-                </a>
-            </div>
-
-            <div class="flex gap-3">
-                <button onclick="closeSettings()" class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-all">Cancelar</button>
-                <button onclick="saveApiKey()" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-all shadow-md">Salvar Chave</button>
+            <input type="password" id="apiKeyInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none mb-2 font-mono text-sm" placeholder="AIzaSyA...">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline mb-6 inline-flex items-center gap-1 font-medium"><i class="ph-link"></i> Obter chave gratuita</a>
+            
+            <div class="flex gap-3 mt-4">
+                <button onclick="closeSettings()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
+                <button onclick="saveApiKey()" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md">Salvar</button>
             </div>
         </div>
     </div>
 
-    <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-40 backdrop-blur-sm">
-        <div class="bg-white p-6 md:p-8 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 id="modalTitle" class="text-2xl font-bold text-slate-800">Editar Conteúdo</h2>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full"><i class="ph-x text-xl"></i></button>
+    <!-- Modal de Edição -->
+    <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-2 sm:p-4 z-40 backdrop-blur-sm">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                <h2 id="modalTitle" class="text-2xl font-extrabold text-slate-800">Editar Módulo</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-full transition-all"><i class="ph-x text-xl font-bold"></i></button>
             </div>
 
-            <div class="mb-6 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                <h3 class="font-semibold text-indigo-800 flex items-center gap-2 mb-2"><i class="ph-magic-wand"></i> Gerador de Conteúdo IA</h3>
-                <p class="text-sm text-indigo-600 mb-4">Faça upload de um PDF/DOCX ou cole um texto base abaixo e deixe a IA criar a aula, o quiz e os desafios para você.</p>
-                
-                <!-- Área de Upload -->
-                <div id="dropArea" class="file-upload-area bg-white rounded-xl p-6 text-center cursor-pointer mb-2">
-                    <input type="file" id="fileInput" accept=".pdf,.docx" class="hidden">
-                    <i class="ph-file-pdf text-4xl text-indigo-400 mb-2"></i>
-                    <p class="text-slate-600 font-medium">Extrair texto de PDF ou DOCX</p>
-                    <p class="text-xs text-slate-400 mt-1">Clique ou arraste o arquivo aqui</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Título do Módulo</label>
+                    <input type="text" id="editTitle" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
                 </div>
-                <div id="fileStatus" class="text-sm font-medium hidden text-center mb-4"></div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Descrição Curta</label>
+                    <input type="text" id="editDesc" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 mb-8">
+                <h3 class="font-bold text-indigo-900 flex items-center gap-2 mb-4 text-lg"><i class="ph-magic-wand text-2xl"></i> Assistente de IA</h3>
                 
-                <!-- NOVO: Container que mostra se há um PDF anexado -->
-                <div id="pdfAttachmentContainer" class="hidden flex items-center justify-between bg-white border border-indigo-200 p-3 rounded-lg mb-2 shadow-sm">
-                    <div class="flex items-center gap-2 text-sm text-indigo-900 font-medium truncate">
-                        <i class="ph-file-pdf text-red-500 text-2xl"></i>
-                        <span id="attachedPdfName" class="truncate max-w-[200px] md:max-w-[400px]">arquivo.pdf</span>
-                        <span class="text-xs text-indigo-400 font-normal hidden sm:inline">(Será exibido na tela do aluno)</span>
+                <div id="dropArea" class="file-upload-area bg-white rounded-xl p-8 text-center cursor-pointer mb-4 shadow-sm group">
+                    <input type="file" id="fileInput" accept=".pdf,.docx" class="hidden">
+                    <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="ph-file-pdf text-3xl text-indigo-600"></i>
                     </div>
-                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-md transition-all" title="Remover PDF da Aula">
-                        <i class="ph-trash text-lg"></i>
+                    <p class="text-slate-700 font-bold text-lg">Extrair texto e Anexar PDF</p>
+                    <p class="text-sm text-slate-500 mt-1">Clique ou arraste o arquivo aqui</p>
+                </div>
+                
+                <div id="pdfAttachmentContainer" class="hidden flex items-center justify-between bg-white border border-indigo-200 p-4 rounded-xl mb-4 shadow-sm">
+                    <div class="flex items-center gap-3 text-indigo-900 font-semibold truncate">
+                        <i class="ph-check-circle text-emerald-500 text-2xl"></i>
+                        <span id="attachedPdfName" class="truncate max-w-[200px] md:max-w-[400px]">arquivo.pdf</span>
+                    </div>
+                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all"><i class="ph-trash text-xl"></i></button>
+                </div>
+
+                <div id="quizBadgeContainer" class="hidden mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex justify-between items-center">
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold">
+                        <i class="ph-game-controller text-xl"></i>
+                        <span>Quiz Interativo Configurado</span>
+                    </div>
+                    <span class="text-xs font-bold bg-emerald-200 text-emerald-800 px-2 py-1 rounded-md" id="quizCountBadge">4 perguntas</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button id="btnGenerateAll" onclick="generateAI('completo')" class="bg-indigo-600 text-white py-3.5 px-4 rounded-xl hover:bg-indigo-700 transition-all font-bold flex items-center justify-center gap-2 shadow-md">
+                        <i class="ph-sparkles"></i> Gerar Aula + Quiz Interativo
+                    </button>
+                    <button id="btnGenerateQuiz" onclick="generateAI('quiz')" class="bg-slate-800 text-white py-3.5 px-4 rounded-xl hover:bg-slate-700 transition-all font-bold flex items-center justify-center gap-2 shadow-md">
+                        <i class="ph-list-checks"></i> Gerar apenas Quiz
                     </button>
                 </div>
             </div>
 
-            <!-- Editor de Texto -->
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Conteúdo da Aula (Markdown / Texto)</label>
-            <textarea id="editContent" class="w-full h-80 p-4 border border-slate-300 rounded-xl mb-6 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm resize-y" placeholder="Cole o texto base aqui ou digite o conteúdo..."></textarea>
+            <label class="block text-sm font-bold text-slate-700 mb-2">Conteúdo da Aula (Markdown)</label>
+            <textarea id="editContent" class="w-full h-96 p-5 border border-slate-300 rounded-2xl mb-8 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm shadow-inner bg-slate-50" placeholder="Texto base gerado ou extraído..."></textarea>
             
-            <!-- Botões de Ação -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 pb-6 border-b border-slate-200">
-                <button id="btnGenerateAll" onclick="generateAI('completo')" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl hover:shadow-lg hover:opacity-90 transition-all font-medium flex items-center justify-center gap-2">
-                    <i class="ph-sparkles"></i> Gerar Aula + Desafios + Quiz
-                </button>
-                <button id="btnGenerateQuiz" onclick="generateAI('quiz')" class="bg-slate-800 text-white py-3 px-4 rounded-xl hover:bg-slate-700 transition-all font-medium flex items-center justify-center gap-2">
-                    <i class="ph-list-checks"></i> Gerar apenas Quiz
-                </button>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button onclick="closeModal()" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-all">Cancelar</button>
-                <button onclick="saveChanges()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-md flex items-center gap-2">
-                    <i class="ph-floppy-disk"></i> Salvar Módulo
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button onclick="closeModal()" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
+                <button onclick="saveChanges()" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center gap-2">
+                    <i class="ph-floppy-disk text-xl"></i> Salvar Módulo
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração PDF.js Global
+        // Configuração PDF.js Global Segura
         if (window.pdfjsLib) {
             window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
@@ -184,35 +177,51 @@
         let currentView = 'modules';
         let activeModuleId = null;
         let apiKey = localStorage.getItem('guia_api_key') || '';
-        const ADMIN_PASSWORD = "admin"; // Senha padrão configurada
+        const ADMIN_PASSWORD = "admin";
 
-        // NOVAS VARIÁVEIS PARA O PDF
+        // Variáveis Temporárias de Edição
         let tempPdfData = null;
         let tempPdfName = null;
+        let tempQuizData = null; // Guarda o array JSON do quiz
 
-        // Dados Iniciais / Salvos
+        // Estado do Quiz Interativo durante o uso
+        let activeQuizData = null;
+        let activeQuizState = {}; 
+
         const defaultData = [
-            { id: 'win11', title: 'Windows 11 Essencial', desc: 'Produtividade e ferramentas modernas.', icon: 'ph-windows-logo', color: 'bg-blue-50 text-blue-600', content: '## Bem-vindo ao Windows 11\n\nEste é o conteúdo base...' },
-            { id: 'office', title: 'Microsoft Office', desc: 'Domine Word, Excel e PowerPoint.', icon: 'ph-microsoft-excel-logo', color: 'bg-green-50 text-green-600', content: '## Pacote Office\n\n...' },
-            { id: 'ia', title: 'Inteligência Artificial', desc: 'Aprenda a usar IA no dia a dia.', icon: 'ph-robot', color: 'bg-purple-50 text-purple-600', content: '## O Futuro com IA\n\n...' },
-            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis facilmente.', icon: 'ph-video', color: 'bg-zinc-50 text-zinc-800', content: '## Edição de Vídeo\n\n...' }
+            { 
+                id: 'win11', title: 'Windows 11 Descomplicado', desc: 'Domine o sistema e aumente sua produtividade.', 
+                icon: 'ph-windows-logo', color: 'from-cyan-500 to-blue-600', 
+                content: '## 📚 Resumo da Aula\n\nO Windows 11 é o sistema operacional mais moderno da Microsoft, focado em produtividade e design limpo.\n\n### Principais Mudanças:\n- **Menu Iniciar Centralizado:** Mais rápido de acessar.\n- **Snap Layouts:** Organize janelas em grade com um clique.\n\n## 🎯 Desafios Práticos\n1. Fixe seus 3 aplicativos favoritos no Menu Iniciar.\n2. Abra duas janelas e divida a tela meio a meio usando o Snap Layouts.',
+                quizData: [
+                    {
+                        pergunta: "Qual é a principal função visual nova do Menu Iniciar no Windows 11?",
+                        opcoes: ["Ele foi removido", "Ele agora fica centralizado na barra de tarefas", "Ele é ativado apenas por voz", "Ele ocupa a tela inteira por padrão"],
+                        correta: 1,
+                        justificativa: "Para facilitar o acesso em monitores grandes, a Microsoft centralizou o botão Iniciar e os ícones da barra de tarefas."
+                    },
+                    {
+                        pergunta: "O que o recurso 'Snap Layouts' permite fazer?",
+                        opcoes: ["Tirar fotos da tela (Print Screen)", "Desinstalar programas inúteis", "Organizar rapidamente várias janelas abertas em uma grade na tela", "Alterar o papel de parede automaticamente"],
+                        correta: 2,
+                        justificativa: "Ao passar o mouse sobre o botão de maximizar, o Snap Layouts sugere grades perfeitas para dividir a tela entre seus apps."
+                    }
+                ]
+            },
+            { id: 'office', title: 'Pacote Office Essencial', desc: 'Word, Excel e PowerPoint para o dia a dia.', icon: 'ph-microsoft-excel-logo', color: 'from-green-500 to-emerald-600', content: '## Pacote Office\n\nConteúdo em construção.' },
+            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis pelo celular ou PC.', icon: 'ph-video', color: 'from-zinc-700 to-black', content: '## CapCut Essencial\n\nConteúdo em construção.' },
+            { id: 'ia', title: 'Mundo da Inteligência Artificial', desc: 'Aprenda a usar ChatGPT e Gemini a seu favor.', icon: 'ph-robot', color: 'from-purple-500 to-pink-600', content: '## Inteligência Artificial\n\nConteúdo em construção.' }
         ];
 
-        let modules = JSON.parse(localStorage.getItem('guia_modules_data')) || defaultData;
+        let modules = JSON.parse(localStorage.getItem('guia_modules_data_v2')) || defaultData;
 
-        // Persistência com tratamento de erro (limite de tamanho do PDF)
         function saveData() {
             try {
-                localStorage.setItem('guia_modules_data', JSON.stringify(modules));
+                localStorage.setItem('guia_modules_data_v2', JSON.stringify(modules));
                 return true;
             } catch (e) {
-                console.error("Local storage error:", e);
-                // Erro comum quando o PDF é maior que ~5MB
-                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    showToast("Erro: O arquivo PDF é muito grande para ser salvo no navegador. Tente um arquivo menor.", "error");
-                } else {
-                    showToast("Erro ao salvar os dados.", "error");
-                }
+                console.error(e);
+                showToast("Erro ao salvar! Se anexou um PDF, ele pode ser grande demais para o navegador.", "error");
                 return false;
             }
         }
@@ -220,54 +229,48 @@
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            
             const styles = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
             const icon = type === 'success' ? 'ph-check-circle' : (type === 'error' ? 'ph-warning-circle' : 'ph-info');
             
-            toast.className = `${styles} text-white px-5 py-3 rounded-xl shadow-xl transform transition-all translate-y-10 opacity-0 flex items-center gap-3 font-medium pointer-events-auto`;
+            toast.className = `${styles} text-white px-6 py-4 rounded-2xl shadow-xl transform transition-all translate-y-10 opacity-0 flex items-center gap-3 font-bold`;
             toast.innerHTML = `<i class="${icon} text-2xl"></i> <span>${message}</span>`;
             
             container.appendChild(toast);
-            
-            // Animação de entrada
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-            
-            // Animação de saída
-            setTimeout(() => {
-                toast.classList.add('translate-y-10', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        // Alternar Modos e Autenticação
         function toggleProfessorMode() {
             if (!isProfessor) {
-                // Abre o modal para pedir a senha
                 document.getElementById('adminPasswordInput').value = '';
                 document.getElementById('authModal').classList.remove('hidden');
                 setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
             } else {
-                // Desativa o modo sem precisar de senha
                 isProfessor = false;
                 applyModeUI();
-                showToast("Visualização do Aluno ativada.", "info");
+                showToast("Modo Aluno ativado.", "info");
             }
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
         }
 
         function attemptLogin() {
-            const input = document.getElementById('adminPasswordInput').value;
-            if (input === ADMIN_PASSWORD) {
+            if (document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
                 isProfessor = true;
                 closeAuthModal();
                 applyModeUI();
-                showToast("Modo Professor ativado. Você agora pode editar conteúdos.", "info");
+                showToast("Modo Administrador ativado!", "success");
             } else {
                 showToast("Senha incorreta!", "error");
             }
+        }
+
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+        function openSettings() { document.getElementById('apiKeyInput').value = apiKey; document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+        
+        function saveApiKey() {
+            apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (apiKey) { localStorage.setItem('guia_api_key', apiKey); closeSettings(); showToast("Chave IA conectada!", "success"); } 
+            else { showToast("Insira uma chave válida.", "error"); }
         }
 
         function applyModeUI() {
@@ -276,158 +279,106 @@
             const settingsBtn = document.getElementById('settingsBtn');
 
             if (isProfessor) {
-                btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
-                btn.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-700');
-                btnText.innerText = "Modo Professor Ativo";
-                settingsBtn.classList.remove('hidden');
-                settingsBtn.classList.add('flex', 'items-center', 'gap-2');
+                btn.className = "px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold transition-all shadow-md flex items-center gap-2";
+                btn.innerHTML = `<i class="ph-pencil-simple text-lg"></i> <span id="modeText">Modo Professor</span>`;
+                settingsBtn.classList.remove('hidden'); settingsBtn.classList.add('flex');
             } else {
-                btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
-                btn.classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-700');
-                btnText.innerText = "Ver como Aluno";
-                settingsBtn.classList.add('hidden');
-                settingsBtn.classList.remove('flex', 'items-center', 'gap-2');
+                btn.className = "px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold transition-all shadow-md flex items-center gap-2";
+                btn.innerHTML = `<i class="ph-student text-lg"></i> <span id="modeText">Ver como Aluno</span>`;
+                settingsBtn.classList.add('hidden'); settingsBtn.classList.remove('flex');
             }
             render();
         }
 
-        function openSettings() {
-            document.getElementById('apiKeyInput').value = apiKey;
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').classList.add('hidden');
-        }
-
-        function saveApiKey() {
-            const input = document.getElementById('apiKeyInput').value.trim();
-            if (input) {
-                apiKey = input;
-                localStorage.setItem('guia_api_key', apiKey);
-                closeSettings();
-                showToast("Chave API salva com sucesso! O Gerador de IA está pronto.", "success");
-            } else {
-                showToast("Por favor, insira uma chave válida.", "error");
-            }
-        }
-
         async function callGeminiAPI(promptText) {
-            if (!apiKey) {
-                showToast("Chave da API não configurada. Abra as configurações.", "error");
-                openSettings();
-                return null;
-            }
-
-            // Atualização do modelo: Usando o modelo de produção mais recente (gemini-2.5-flash)
-            // pois as versões 1.5 foram descontinuadas pelo Google.
+            if (!apiKey) { showToast("Chave IA não configurada.", "error"); openSettings(); return null; }
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: { temperature: 0.7 }
-            };
-
             try {
                 const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } })
                 });
-
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || "Erro desconhecido na API");
-                }
-
+                if (!response.ok) throw new Error("Erro na requisição. Verifique sua chave.");
                 const data = await response.json();
-                if (data.candidates && data.candidates.length > 0) {
-                    return data.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error("A IA não retornou conteúdo.");
-                }
-            } catch (error) {
-                console.error("Erro IA:", error);
-                showToast(`Falha na IA: ${error.message}`, "error");
-                return null;
-            }
+                return data.candidates[0].content.parts[0].text;
+            } catch (e) { showToast(e.message, "error"); return null; }
         }
 
         async function generateAI(tipo) {
-            const textArea = document.getElementById('editContent');
-            const material = textArea.value.trim();
-            
-            if (material.length < 50) {
-                showToast("Por favor, cole um texto base maior ou extraia de um PDF primeiro.", "error");
-                return;
-            }
+            const material = document.getElementById('editContent').value.trim();
+            if (material.length < 50) { showToast("Insira mais texto base ou anexe um PDF.", "error"); return; }
 
-            // Identificar o botão para mostrar loading
-            const btnId = tipo === 'completo' ? 'btnGenerateAll' : 'btnGenerateQuiz';
-            const btn = document.getElementById(btnId);
+            const btn = document.getElementById(tipo === 'completo' ? 'btnGenerateAll' : 'btnGenerateQuiz');
             const originalHTML = btn.innerHTML;
-            
-            btn.innerHTML = `<div class="loading-spinner"></div> Gerando...`;
-            btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btn.innerHTML = `<div class="loading-spinner"></div> Gerando...`; btn.disabled = true;
 
             let prompt = "";
             if (tipo === 'completo') {
-                prompt = `Você é um Designer Instrucional Especialista. Baseado APENAS no texto de apoio fornecido, crie um material didático completo usando formatação Markdown.
-A estrutura OBRIGATÓRIA deve ser:
+                prompt = `Você é um Designer Instrucional. Analise o texto e crie o material OBRIGATORIAMENTE usando estas tags:
+
+[CONTEUDO_MARKDOWN]
 ## 📚 Resumo da Aula
-(Crie uma explicação clara, amigável e em tópicos)
+(tópicos claros e diretos)
 ## 🎯 Desafios Práticos
-(Crie 3 desafios para o aluno executar no dia a dia)
-## 📝 Quiz de Fixação
-(Crie 4 perguntas de múltipla escolha. Destaque a resposta correta com o emoji ✅).
+(2 desafios aplicáveis)
+[/CONTEUDO_MARKDOWN]
 
-Texto de Apoio:
-${material}`;
+[QUIZ_JSON]
+[
+  {"pergunta": "Questão 1?", "opcoes": ["A", "B", "C", "D"], "correta": 0, "justificativa": "Motivo da resposta."}
+]
+[/QUIZ_JSON]
+
+Texto base: ${material}`;
             } else {
-                prompt = `Baseado no texto fornecido, crie APENAS um Quiz com 5 perguntas de múltipla escolha. Destaque a resposta correta com um ✅. Retorne em formato Markdown. Texto:\n${material}`;
+                prompt = `Crie um quiz baseado no texto. Retorne OBRIGATORIAMENTE APENAS o JSON dentro das tags:
+[QUIZ_JSON]
+[ {"pergunta": "...", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "..."} ]
+[/QUIZ_JSON]
+Texto: ${material}`;
             }
 
-            const aiResponse = await callGeminiAPI(prompt);
-
-            if (aiResponse) {
-                textArea.value = material + "\n\n---\n\n" + aiResponse;
-                showToast("Conteúdo gerado magicamente! ✨", "success");
+            const res = await callGeminiAPI(prompt);
+            if (res) {
+                // Parse Content
+                if (tipo === 'completo') {
+                    const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
+                    const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
+                    if (mdStart > 18 && mdEnd !== -1) {
+                        document.getElementById('editContent').value = res.substring(mdStart, mdEnd).trim();
+                    }
+                }
+                
+                // Parse JSON Quiz
+                const jStart = res.indexOf('[QUIZ_JSON]') + 11;
+                const jEnd = res.indexOf('[/QUIZ_JSON]');
+                if (jStart > 10 && jEnd !== -1) {
+                    try {
+                        let rawJson = res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim();
+                        tempQuizData = JSON.parse(rawJson);
+                        updateQuizBadge();
+                        showToast("Quiz interativo gerado com sucesso! ✨", "success");
+                    } catch (e) {
+                        console.error(e); showToast("Erro ao ler o formato do Quiz gerado pela IA.", "error");
+                    }
+                }
             }
-
-            // Restaura o botão
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            btn.innerHTML = originalHTML; btn.disabled = false;
         }
 
         function setupFileExtraction() {
             const dropArea = document.getElementById('dropArea');
             const fileInput = document.getElementById('fileInput');
-            
             dropArea.onclick = () => fileInput.click();
-
-            dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('active'); });
-            dropArea.addEventListener('dragleave', () => dropArea.classList.remove('active'));
-            dropArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropArea.classList.remove('active');
-                if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
-            });
-
-            fileInput.onchange = (e) => {
-                if (e.target.files.length) processFile(e.target.files[0]);
-            };
+            fileInput.onchange = (e) => { if (e.target.files.length) processFile(e.target.files[0]); };
         }
 
         async function processFile(file) {
-            const status = document.getElementById('fileStatus');
-            status.classList.remove('hidden');
-            status.className = "text-sm font-medium text-indigo-600 text-center mb-4 flex justify-center items-center gap-2";
-            status.innerHTML = `<div class="loading-spinner border-indigo-200 border-t-indigo-600"></div> Lendo documento...`;
-
+            showToast("Lendo documento... Aguarde.", "info");
             try {
                 let text = '';
                 if (file.type === 'application/pdf') {
+                    if (!window.pdfjsLib) throw new Error("Leitor de PDF não carregou. Recarregue a página.");
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     for (let i = 1; i <= pdf.numPages; i++) {
@@ -435,106 +386,216 @@ ${material}`;
                         const content = await page.getTextContent();
                         text += content.items.map(item => item.str).join(' ') + '\n\n';
                     }
-                    
-                    // Lógica adicionada para transformar o PDF em visualização para o aluno
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                        tempPdfData = e.target.result;
-                        tempPdfName = file.name;
-                        updatePdfAttachmentUI();
-                    };
+                    reader.onload = (e) => { tempPdfData = e.target.result; tempPdfName = file.name; updatePdfAttachmentUI(); };
                     reader.readAsDataURL(file);
-
-                } else if (file.name.endsWith('.docx')) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
-                    text = result.value;
-                } else {
-                    throw new Error("Formato inválido. Use .pdf ou .docx");
-                }
-
+                } else { throw new Error("Apenas PDFs suportados no momento."); }
+                
                 document.getElementById('editContent').value = text.trim();
-                status.className = "text-sm font-bold text-emerald-600 text-center mb-4";
-                status.innerHTML = `<i class="ph-check-circle text-lg align-middle"></i> Texto extraído! (${text.length} caracteres). Clique em Gerar com IA.`;
-            } catch (error) {
-                status.className = "text-sm font-bold text-red-600 text-center mb-4";
-                status.innerHTML = `<i class="ph-warning-circle text-lg align-middle"></i> Erro: ${error.message}`;
-            }
+                showToast("Texto extraído! Agora clique em Gerar com IA.", "success");
+            } catch (e) { showToast(e.message, "error"); }
         }
 
-        // NOVO: Funções para gerenciar o anexo de PDF
         function updatePdfAttachmentUI() {
             const container = document.getElementById('pdfAttachmentContainer');
-            const nameSpan = document.getElementById('attachedPdfName');
-            if (tempPdfData && tempPdfName) {
-                nameSpan.innerText = tempPdfName;
-                container.classList.remove('hidden');
-                container.classList.add('flex');
+            if (tempPdfData) {
+                document.getElementById('attachedPdfName').innerText = tempPdfName;
+                container.classList.remove('hidden'); container.classList.add('flex');
             } else {
-                container.classList.add('hidden');
-                container.classList.remove('flex');
+                container.classList.add('hidden'); container.classList.remove('flex');
+            }
+        }
+        
+        function updateQuizBadge() {
+            const container = document.getElementById('quizBadgeContainer');
+            if (tempQuizData && tempQuizData.length > 0) {
+                document.getElementById('quizCountBadge').innerText = `${tempQuizData.length} perguntas`;
+                container.classList.remove('hidden'); container.classList.add('flex');
+            } else {
+                container.classList.add('hidden'); container.classList.remove('flex');
             }
         }
 
-        function removeAttachedPdf() {
-            tempPdfData = null;
-            tempPdfName = null;
-            updatePdfAttachmentUI();
-            showToast("Anexo PDF removido da aula", "info");
-        }
+        function removeAttachedPdf() { tempPdfData = null; tempPdfName = null; updatePdfAttachmentUI(); }
 
         function openEdit(id) {
             activeModuleId = id;
             const mod = modules.find(m => m.id === id);
             
-            // Carrega o PDF salvo, se existir
-            tempPdfData = mod.pdfData || null;
-            tempPdfName = mod.pdfName || null;
-            updatePdfAttachmentUI();
-
-            document.getElementById('modalTitle').innerText = `Editando: ${mod.title}`;
+            document.getElementById('editTitle').value = mod.title;
+            document.getElementById('editDesc').value = mod.desc;
             document.getElementById('editContent').value = mod.content;
-            document.getElementById('fileStatus').classList.add('hidden');
+            
+            tempPdfData = mod.pdfData || null; tempPdfName = mod.pdfName || null;
+            tempQuizData = mod.quizData || null;
+            
+            updatePdfAttachmentUI();
+            updateQuizBadge();
+            
             document.getElementById('editModal').classList.remove('hidden');
             setupFileExtraction();
         }
 
-        function closeModal() {
-            document.getElementById('editModal').classList.add('hidden');
-            activeModuleId = null;
-        }
+        function closeModal() { document.getElementById('editModal').classList.add('hidden'); activeModuleId = null; }
 
         function saveChanges() {
-            const content = document.getElementById('editContent').value.trim();
-            if (!content) { showToast("O conteúdo não pode estar vazio.", "error"); return; }
-            
             const mod = modules.find(m => m.id === activeModuleId);
-            
-            // Backup dos dados antigos em caso de falha de salvamento (ex: arquivo grande demais)
-            const backupContent = mod.content;
-            const backupPdfData = mod.pdfData;
-            const backupPdfName = mod.pdfName;
+            const backup = { ...mod };
 
-            mod.content = content;
+            mod.title = document.getElementById('editTitle').value;
+            mod.desc = document.getElementById('editDesc').value;
+            mod.content = document.getElementById('editContent').value;
             mod.pdfData = tempPdfData;
             mod.pdfName = tempPdfName;
+            mod.quizData = tempQuizData;
 
-            // Se o salvamento for bem sucedido, prossegue.
             if (saveData()) {
-                closeModal();
-                render();
-                showToast("Módulo salvo com sucesso!", "success");
+                closeModal(); render(); showToast("Módulo atualizado com sucesso!", "success");
             } else {
-                // Se falhou (falta de espaço), reverte para os dados anteriores
-                mod.content = backupContent;
-                mod.pdfData = backupPdfData;
-                mod.pdfName = backupPdfName;
+                Object.assign(mod, backup); // rollback if failed
             }
         }
 
+        function renderQuizUI() {
+            const container = document.getElementById('quizContainer');
+            if (!container || !activeQuizData) return;
+
+            let html = '<div class="space-y-6 mt-10">';
+            html += '<div class="flex items-center gap-3 mb-6"><div class="bg-indigo-100 p-2 rounded-lg text-indigo-600"><i class="ph-game-controller text-2xl"></i></div><h3 class="text-2xl font-extrabold text-slate-800">Quiz de Fixação</h3></div>';
+
+            activeQuizData.forEach((q, qIndex) => {
+                const state = activeQuizState[qIndex] || {};
+                const answered = state.answered;
+                const isCorrect = state.selected === q.correta;
+
+                let borderClass = 'border-slate-200';
+                if (answered) borderClass = isCorrect ? 'border-emerald-500 bg-emerald-50/30' : 'border-red-500 bg-red-50/30';
+
+                html += `<div class="bg-white p-6 md:p-8 rounded-3xl border-2 ${borderClass} shadow-sm transition-all animate-fade-in relative overflow-hidden">`;
+                
+                // Question text
+                html += `<h4 class="text-xl font-bold text-slate-800 mb-6 flex gap-3"><span class="text-indigo-500">${qIndex + 1}.</span> ${q.pergunta}</h4>`;
+                html += `<div class="space-y-3">`;
+
+                // Options
+                q.opcoes.forEach((opt, optIndex) => {
+                    const isSelected = state.selected === optIndex;
+                    const isActuallyCorrect = q.correta === optIndex;
+
+                    let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center group ";
+
+                    if (!answered) {
+                        btnClass += "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 cursor-pointer font-medium";
+                    } else {
+                        btnClass += "cursor-default ";
+                        if (isActuallyCorrect) {
+                            btnClass += "bg-emerald-500 border-emerald-500 text-white font-bold shadow-md transform scale-[1.02]";
+                        } else if (isSelected && !isCorrect) {
+                            btnClass += "bg-red-50 border-red-500 text-red-800 font-bold";
+                        } else {
+                            btnClass += "border-slate-100 text-slate-400 opacity-60";
+                        }
+                    }
+
+                    html += `<button ${!answered ? `onclick="answerQuestion(${qIndex}, ${optIndex})"` : 'disabled'} class="${btnClass}">`;
+                    html += `<span>${opt}</span>`;
+                    
+                    if (!answered) {
+                        html += `<div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-400 flex-shrink-0"></div>`;
+                    } else {
+                        if (isActuallyCorrect) html += `<i class="ph-check-circle text-2xl text-white"></i>`;
+                        else if (isSelected && !isCorrect) html += `<i class="ph-x-circle text-2xl text-red-600"></i>`;
+                    }
+                    html += `</button>`;
+                });
+
+                html += `</div>`;
+
+                // Justification Box
+                if (answered) {
+                    html += `<div class="mt-6 p-5 rounded-2xl ${isCorrect ? 'bg-emerald-100/50 border border-emerald-200 text-emerald-900' : 'bg-red-100/50 border border-red-200 text-red-900'} animate-fade-in flex gap-4 items-start">`;
+                    html += `<i class="${isCorrect ? 'ph-check-circle text-emerald-600' : 'ph-info text-red-600'} text-3xl shrink-0"></i>`;
+                    html += `<div><p class="font-bold text-lg mb-1">${isCorrect ? 'Excelente! Resposta Certa.' : 'Puxa, resposta incorreta.'}</p><p class="text-base leading-relaxed">${q.justificativa}</p></div>`;
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        window.answerQuestion = function(qIndex, optIndex) {
+            activeQuizState[qIndex] = { answered: true, selected: optIndex };
+            renderQuizUI();
+        }
+
+        // Criar URL segura para o PDF (contorna bloqueios de navegadores modernos)
+        function getSafePdfUrl(base64Data) {
+            if (!base64Data || !base64Data.startsWith('data:')) return base64Data;
+            try {
+                const base64 = base64Data.split(',')[1];
+                const byteString = atob(base64);
+                const arrayBuffer = new ArrayBuffer(byteString.length);
+                const int8Array = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < byteString.length; i++) {
+                    int8Array[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([int8Array], { type: 'application/pdf' });
+                return URL.createObjectURL(blob);
+            } catch (e) {
+                console.error("Erro ao converter PDF", e);
+                return base64Data;
+            }
+        }
+
+        async function generateNewPractice() {
+            if (!apiKey) { showToast("IA não configurada. Fale com o Professor.", "error"); return; }
+            
+            const btn = document.getElementById('btnPraticarMais');
+            btn.innerHTML = `<div class="loading-spinner"></div> Criando desafios...`; btn.disabled = true;
+
+            const mod = modules.find(m => m.id === activeModuleId);
+            const prompt = `Analise o texto e crie NOVOS desafios e um NOVO quiz inédito. Siga EXATAMENTE as tags:
+[CONTEUDO_MARKDOWN]
+## 🚀 Novos Desafios Práticos (Treino Extra)
+(2 novos desafios)
+[/CONTEUDO_MARKDOWN]
+[QUIZ_JSON]
+[ {"pergunta": "Nova questao?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "..."} ]
+[/QUIZ_JSON]
+Texto: ${mod.content.substring(0, 3000)}`;
+
+            const res = await callGeminiAPI(prompt);
+            if (res) {
+                const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
+                const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
+                if (mdStart > 18 && mdEnd !== -1) {
+                    document.getElementById('extraPracticeContent').innerHTML = marked.parse(res.substring(mdStart, mdEnd).trim());
+                }
+                
+                const jStart = res.indexOf('[QUIZ_JSON]') + 11;
+                const jEnd = res.indexOf('[/QUIZ_JSON]');
+                if (jStart > 10 && jEnd !== -1) {
+                    try {
+                        activeQuizData = JSON.parse(res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim());
+                        activeQuizState = {}; // reseta estado
+                        renderQuizUI();
+                        showToast("Novos exercícios gerados!", "success");
+                    } catch (e) { showToast("Erro ao processar novo quiz.", "error"); }
+                }
+            }
+            btn.innerHTML = `<i class="ph-arrows-clockwise text-xl"></i> Gerar Outro Treino (IA)`; btn.disabled = false;
+        }
+
         function openModule(id) {
-            activeModuleId = id;
-            currentView = 'module';
+            activeModuleId = id; currentView = 'module';
+            const mod = modules.find(m => m.id === id);
+            
+            // Set up active quiz session
+            activeQuizData = mod.quizData ? JSON.parse(JSON.stringify(mod.quizData)) : null;
+            activeQuizState = {};
+            
             render();
         }
 
@@ -543,25 +604,29 @@ ${material}`;
             
             if (currentView === 'modules') {
                 app.innerHTML = `
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-extrabold text-slate-800">Trilhas de Aprendizagem</h2>
-                        <p class="text-slate-500 mt-2 text-lg">Selecione um conteúdo para começar sua jornada.</p>
+                    <div class="text-center max-w-2xl mx-auto mb-12">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">O que vamos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">aprender hoje?</span></h2>
+                        <p class="text-slate-500 text-lg">Selecione uma trilha e evolua suas habilidades digitais.</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                         ${modules.map(m => `
-                            <div class="bg-white rounded-2xl border border-slate-200 p-6 card-shadow relative group hover:-translate-y-1 transition-all duration-300">
+                            <div class="bg-white rounded-3xl p-8 card-shadow border border-slate-100 relative group hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${m.color} opacity-10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                                
                                 ${isProfessor ? `
-                                    <button onclick="openEdit('${m.id}')" class="absolute top-4 right-4 bg-amber-400 hover:bg-amber-500 text-amber-900 p-2.5 rounded-full shadow-lg transition-all z-10" title="Editar Aula">
-                                        <i class="ph-pencil-simple text-lg font-bold"></i>
+                                    <button onclick="openEdit('${m.id}')" class="absolute top-6 right-6 bg-amber-400 hover:bg-amber-500 text-amber-900 p-3 rounded-xl shadow-lg transition-all z-10 flex items-center gap-2 font-bold" title="Editar Aula">
+                                        <i class="ph-pencil-simple text-xl"></i> Editar
                                     </button>
                                 ` : ''}
-                                <div class="w-14 h-14 ${m.color} rounded-xl flex items-center justify-center mb-6">
+                                
+                                <div class="w-16 h-16 bg-gradient-to-br ${m.color} rounded-2xl flex items-center justify-center mb-6 shadow-md text-white group-hover:scale-110 transition-transform">
                                     <i class="${m.icon} text-3xl"></i>
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-800 mb-2">${m.title}</h3>
-                                <p class="text-slate-500 mb-6 line-clamp-2 h-12">${m.desc}</p>
-                                <button onclick="openModule('${m.id}')" class="w-full py-3 bg-slate-50 text-indigo-600 font-semibold rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors border border-indigo-100 flex items-center justify-center gap-2">
-                                    Acessar Conteúdo <i class="ph-arrow-right font-bold"></i>
+                                <h3 class="text-2xl font-bold text-slate-800 mb-3">${m.title}</h3>
+                                <p class="text-slate-500 mb-8 text-lg">${m.desc}</p>
+                                <button onclick="openModule('${m.id}')" class="w-full py-4 bg-slate-50 text-indigo-600 font-bold text-lg rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all border border-indigo-100 flex items-center justify-center gap-3">
+                                    Acessar Módulo <i class="ph-arrow-right font-bold text-xl"></i>
                                 </button>
                             </div>
                         `).join('')}
@@ -570,66 +635,69 @@ ${material}`;
             } else {
                 const mod = modules.find(m => m.id === activeModuleId);
                 const parsedContent = marked.parse(mod.content);
+                const safePdfUrl = mod.pdfData ? getSafePdfUrl(mod.pdfData) : null;
                 
                 app.innerHTML = `
-                    <button onclick="currentView='modules'; render();" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 mb-6 font-semibold transition-all group">
-                        <i class="ph-arrow-left font-bold group-hover:-translate-x-1 transition-transform"></i> Voltar ao painel principal
+                    <button onclick="currentView='modules'; render();" class="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-8 font-bold transition-all bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 w-fit">
+                        <i class="ph-arrow-left text-xl"></i> Voltar ao Painel
                     </button>
                     
-                    <div class="bg-white rounded-3xl border border-slate-200 card-shadow overflow-hidden">
-                        <div class="bg-gradient-to-r from-slate-900 to-indigo-900 p-8 text-white relative">
-                            ${isProfessor ? `
-                                <button onclick="openEdit('${mod.id}')" class="absolute top-8 right-8 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-4 py-2 rounded-xl transition-all flex items-center gap-2 font-medium">
-                                    <i class="ph-pencil-simple"></i> Editar Aula
-                                </button>
-                            ` : ''}
-                            <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md border border-white/20">
-                                <i class="${mod.icon} text-4xl"></i>
+                    <div class="bg-white rounded-[2rem] border border-slate-200 card-shadow overflow-hidden">
+                        <div class="bg-gradient-to-br ${mod.color} p-10 md:p-14 text-white relative overflow-hidden">
+                            <div class="absolute -right-10 -bottom-10 opacity-20 transform rotate-12 pointer-events-none"><i class="${mod.icon} text-[15rem]"></i></div>
+                            
+                            <div class="relative z-10">
+                                <div class="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/30 shadow-xl">
+                                    <i class="${mod.icon} text-5xl"></i>
+                                </div>
+                                <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight drop-shadow-md">${mod.title}</h2>
+                                <p class="text-white/90 text-xl font-medium max-w-2xl">${mod.desc}</p>
                             </div>
-                            <h2 class="text-3xl font-extrabold mb-2">${mod.title}</h2>
-                            <p class="text-indigo-100 text-lg opacity-90">${mod.desc}</p>
                         </div>
                         
-                        <div class="p-8 md:p-12 bg-white module-content">
-                            <!-- EXIBIÇÃO DO PDF ANEXADO PARA O ALUNO -->
-                            ${mod.pdfData ? `
-                                <div class="mb-12 bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 card-shadow">
-                                    <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-3">
-                                        <div class="bg-red-100 p-2.5 rounded-xl text-red-600"><i class="ph-file-pdf"></i></div> 
-                                        Material Original da Aula
-                                    </h3>
-                                    <div class="rounded-xl overflow-hidden shadow-inner border border-slate-300">
-                                        <iframe src="${mod.pdfData}#toolbar=0&navpanes=0" class="w-full h-[500px] md:h-[700px] bg-slate-200" frameborder="0"></iframe>
+                        <div class="p-8 md:p-14 bg-white module-content">
+                            <!-- Visualizador de PDF Seguro -->
+                            ${safePdfUrl ? `
+                                <div class="mb-14 bg-slate-50 p-2 md:p-4 rounded-[2rem] border border-slate-200 shadow-inner">
+                                    <div class="flex items-center gap-3 mb-4 px-4 pt-2">
+                                        <div class="bg-red-500 p-2 rounded-lg text-white"><i class="ph-file-pdf text-xl"></i></div> 
+                                        <h3 class="!m-0 text-xl font-bold text-slate-800">Slides da Aula</h3>
                                     </div>
-                                    <div class="mt-4 text-sm text-slate-500 font-medium flex items-center gap-2">
-                                        <i class="ph-info text-lg"></i> Continue rolando para baixo para ver o resumo e os desafios gerados com IA.
+                                    <div class="rounded-3xl overflow-hidden shadow-md border border-slate-300">
+                                        <iframe src="${safePdfUrl}#toolbar=0&navpanes=0" class="w-full h-[600px] bg-slate-200" frameborder="0"></iframe>
                                     </div>
                                 </div>
-                                <hr class="border-slate-200 mb-8 border-t-2">
                             ` : ''}
 
-                            ${parsedContent}
+                            <!-- Conteúdo Markdown Base -->
+                            <div class="prose max-w-none">${parsedContent}</div>
+                            
+                            <!-- Área de Treino Extra -->
+                            <div id="extraPracticeContent" class="mt-8 prose max-w-none"></div>
+
+                            <!-- Container do Quiz Interativo -->
+                            <div id="quizContainer"></div>
+
+                            <!-- Botão de Prática Extra Aluno -->
+                            <div class="mt-12 pt-8 border-t border-slate-200 text-center">
+                                <div class="bg-indigo-50 rounded-3xl p-8 border border-indigo-100 max-w-2xl mx-auto">
+                                    <h4 class="text-xl font-bold text-indigo-900 mb-2">Quer testar seus conhecimentos?</h4>
+                                    <p class="text-indigo-700 mb-6">Nossa Inteligência Artificial pode criar um desafio inédito baseado nesta aula só para você.</p>
+                                    <button id="btnPraticarMais" onclick="generateNewPractice()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3 mx-auto w-full sm:w-auto">
+                                        <i class="ph-sparkles text-xl"></i> Praticar Mais com IA
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
+                
+                if (activeQuizData) { renderQuizUI(); }
             }
         }
 
-        // Inicialização
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-                closeSettings();
-                closeAuthModal();
-            }
-        });
-
-        // Configurar Marked.js para segurança e formatação
-        marked.setOptions({
-            breaks: true,
-            gfm: true
-        });
-
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeSettings(); closeAuthModal(); } });
+        marked.setOptions({ breaks: true, gfm: true });
         render();
     </script>
 </body>
