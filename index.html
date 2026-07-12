@@ -291,8 +291,9 @@
                 return null;
             }
 
-            // Atualizamos de gemini-1.5-flash para gemini-1.5-pro (versão mais compatível e poderosa da v1beta)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+            // Atualização do modelo: Usando o modelo de produção mais recente (gemini-2.5-flash)
+            // pois as versões 1.5 foram descontinuadas pelo Google.
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [{ parts: [{ text: promptText }] }],
                 generationConfig: { temperature: 0.7 }
