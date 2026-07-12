@@ -136,6 +136,18 @@
                     <p class="text-xs text-slate-400 mt-1">Clique ou arraste o arquivo aqui</p>
                 </div>
                 <div id="fileStatus" class="text-sm font-medium hidden text-center mb-4"></div>
+                
+                <!-- NOVO: Container que mostra se há um PDF anexado -->
+                <div id="pdfAttachmentContainer" class="hidden flex items-center justify-between bg-white border border-indigo-200 p-3 rounded-lg mb-2 shadow-sm">
+                    <div class="flex items-center gap-2 text-sm text-indigo-900 font-medium truncate">
+                        <i class="ph-file-pdf text-red-500 text-2xl"></i>
+                        <span id="attachedPdfName" class="truncate max-w-[200px] md:max-w-[400px]">arquivo.pdf</span>
+                        <span class="text-xs text-indigo-400 font-normal hidden sm:inline">(Será exibido na tela do aluno)</span>
+                    </div>
+                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-md transition-all" title="Remover PDF da Aula">
+                        <i class="ph-trash text-lg"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Editor de Texto -->
@@ -174,6 +186,10 @@
         let apiKey = localStorage.getItem('guia_api_key') || '';
         const ADMIN_PASSWORD = "admin"; // Senha padrão configurada
 
+        // NOVAS VARIÁVEIS PARA O PDF
+        let tempPdfData = null;
+        let tempPdfName = null;
+
         // Dados Iniciais / Salvos
         const defaultData = [
             { id: 'win11', title: 'Windows 11 Essencial', desc: 'Produtividade e ferramentas modernas.', icon: 'ph-windows-logo', color: 'bg-blue-50 text-blue-600', content: '## Bem-vindo ao Windows 11\n\nEste é o conteúdo base...' },
@@ -184,9 +200,21 @@
 
         let modules = JSON.parse(localStorage.getItem('guia_modules_data')) || defaultData;
 
-        // Persistência
+        // Persistência com tratamento de erro (limite de tamanho do PDF)
         function saveData() {
-            localStorage.setItem('guia_modules_data', JSON.stringify(modules));
+            try {
+                localStorage.setItem('guia_modules_data', JSON.stringify(modules));
+                return true;
+            } catch (e) {
+                console.error("Local storage error:", e);
+                // Erro comum quando o PDF é maior que ~5MB
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    showToast("Erro: O arquivo PDF é muito grande para ser salvo no navegador. Tente um arquivo menor.", "error");
+                } else {
+                    showToast("Erro ao salvar os dados.", "error");
+                }
+                return false;
+            }
         }
 
         function showToast(message, type = 'success') {
@@ -407,6 +435,16 @@ ${material}`;
                         const content = await page.getTextContent();
                         text += content.items.map(item => item.str).join(' ') + '\n\n';
                     }
+                    
+                    // Lógica adicionada para transformar o PDF em visualização para o aluno
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        tempPdfData = e.target.result;
+                        tempPdfName = file.name;
+                        updatePdfAttachmentUI();
+                    };
+                    reader.readAsDataURL(file);
+
                 } else if (file.name.endsWith('.docx')) {
                     const arrayBuffer = await file.arrayBuffer();
                     const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
@@ -424,9 +462,36 @@ ${material}`;
             }
         }
 
+        // NOVO: Funções para gerenciar o anexo de PDF
+        function updatePdfAttachmentUI() {
+            const container = document.getElementById('pdfAttachmentContainer');
+            const nameSpan = document.getElementById('attachedPdfName');
+            if (tempPdfData && tempPdfName) {
+                nameSpan.innerText = tempPdfName;
+                container.classList.remove('hidden');
+                container.classList.add('flex');
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+            }
+        }
+
+        function removeAttachedPdf() {
+            tempPdfData = null;
+            tempPdfName = null;
+            updatePdfAttachmentUI();
+            showToast("Anexo PDF removido da aula", "info");
+        }
+
         function openEdit(id) {
             activeModuleId = id;
             const mod = modules.find(m => m.id === id);
+            
+            // Carrega o PDF salvo, se existir
+            tempPdfData = mod.pdfData || null;
+            tempPdfName = mod.pdfName || null;
+            updatePdfAttachmentUI();
+
             document.getElementById('modalTitle').innerText = `Editando: ${mod.title}`;
             document.getElementById('editContent').value = mod.content;
             document.getElementById('fileStatus').classList.add('hidden');
@@ -444,11 +509,27 @@ ${material}`;
             if (!content) { showToast("O conteúdo não pode estar vazio.", "error"); return; }
             
             const mod = modules.find(m => m.id === activeModuleId);
+            
+            // Backup dos dados antigos em caso de falha de salvamento (ex: arquivo grande demais)
+            const backupContent = mod.content;
+            const backupPdfData = mod.pdfData;
+            const backupPdfName = mod.pdfName;
+
             mod.content = content;
-            saveData();
-            closeModal();
-            render();
-            showToast("Módulo salvo com sucesso!", "success");
+            mod.pdfData = tempPdfData;
+            mod.pdfName = tempPdfName;
+
+            // Se o salvamento for bem sucedido, prossegue.
+            if (saveData()) {
+                closeModal();
+                render();
+                showToast("Módulo salvo com sucesso!", "success");
+            } else {
+                // Se falhou (falta de espaço), reverte para os dados anteriores
+                mod.content = backupContent;
+                mod.pdfData = backupPdfData;
+                mod.pdfName = backupPdfName;
+            }
         }
 
         function openModule(id) {
@@ -510,6 +591,23 @@ ${material}`;
                         </div>
                         
                         <div class="p-8 md:p-12 bg-white module-content">
+                            <!-- EXIBIÇÃO DO PDF ANEXADO PARA O ALUNO -->
+                            ${mod.pdfData ? `
+                                <div class="mb-12 bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 card-shadow">
+                                    <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                                        <div class="bg-red-100 p-2.5 rounded-xl text-red-600"><i class="ph-file-pdf"></i></div> 
+                                        Material Original da Aula
+                                    </h3>
+                                    <div class="rounded-xl overflow-hidden shadow-inner border border-slate-300">
+                                        <iframe src="${mod.pdfData}#toolbar=0&navpanes=0" class="w-full h-[500px] md:h-[700px] bg-slate-200" frameborder="0"></iframe>
+                                    </div>
+                                    <div class="mt-4 text-sm text-slate-500 font-medium flex items-center gap-2">
+                                        <i class="ph-info text-lg"></i> Continue rolando para baixo para ver o resumo e os desafios gerados com IA.
+                                    </div>
+                                </div>
+                                <hr class="border-slate-200 mb-8 border-t-2">
+                            ` : ''}
+
                             ${parsedContent}
                         </div>
                     </div>
