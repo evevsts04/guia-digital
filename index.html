@@ -3,108 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia Digital | Letramento Moderno</title>
-    
-    <!-- Bibliotecas Externas -->
+    <title>Guia Digital Interativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
-    <!-- PDF.js na versão mais estável para navegadores -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <style>
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); }
-        .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        .module-content h2 { color: #1e293b; font-weight: 800; font-size: 1.8rem; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .module-content h3 { color: #334155; font-weight: 700; font-size: 1.4rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-        .module-content p { color: #475569; line-height: 1.8; margin-bottom: 1.25rem; font-size: 1.05rem; }
-        .module-content ul, .module-content ol { margin-left: 1.5rem; margin-bottom: 1.5rem; color: #475569; font-size: 1.05rem; }
-        .module-content ul li { list-style-type: none; position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-        .module-content ul li::before { content: "•"; color: #6366f1; font-weight: bold; position: absolute; left: 0; }
-        .module-content blockquote { border-left: 4px solid #6366f1; padding: 1rem 1.5rem; font-style: italic; color: #64748b; background: #f8fafc; border-radius: 0 8px 8px 0; margin-bottom: 1.5rem; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        .file-upload-area { border: 2px dashed #cbd5e1; transition: all 0.2s ease; }
-        .file-upload-area:hover, .file-upload-area.active { border-color: #6366f1; background-color: #f8fafc; }
-        
+        .card-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-leave { animation: fadeOut 0.3s ease-in forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        .prose h1, .prose h2 { font-weight: 800; color: #1e293b; margin-top: 1.5em; margin-bottom: 0.5em; font-size: 1.5rem;}
+        .prose p { margin-bottom: 1em; color: #475569; line-height: 1.7; }
+        .prose ul, .prose ol { margin-left: 1.5em; margin-bottom: 1em; color: #475569; }
+        .prose li { margin-bottom: 0.25em; list-style-type: disc; }
+        .prose strong { color: #0f172a; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <header class="bg-white border-b border-slate-200 p-4 sticky top-0 z-20 shadow-sm">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="currentView='modules'; render();">
-                <div class="bg-gradient-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl shadow-md"><i class="ph-graduation-cap text-white text-2xl"></i></div>
-                <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-800 to-blue-600 hidden sm:block">Guia Digital</h1>
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all card-shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="goBack()">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <i class="ph-book-open text-2xl font-bold"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">Guia<span class="text-indigo-600">Digital</span></h1>
+                    <p class="text-xs text-slate-500 font-medium">Letramento Moderno</p>
+                </div>
             </div>
-            
             <div class="flex items-center gap-3">
-                <button id="settingsBtn" onclick="openSettings()" class="hidden px-3 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all border border-slate-300" title="Configurar IA">
-                    <i class="ph-gear text-xl"></i> <span class="hidden sm:inline ml-1 font-semibold text-sm">IA</span>
+                <button id="btnSettings" onclick="document.getElementById('settingsModal').classList.remove('hidden')" class="hidden w-10 h-10 items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all shadow-sm">
+                    <i class="ph-gear text-xl"></i>
                 </button>
-                
-                <button id="modeToggle" onclick="toggleProfessorMode()" class="px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-semibold transition-all shadow-md flex items-center gap-2">
-                    <i class="ph-student text-lg"></i> <span id="modeText">Ver como Aluno</span>
+                <button id="btnToggleProf" onclick="toggleProfessorMode()" class="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition-all flex items-center gap-2 border border-indigo-100 shadow-sm">
+                    <i class="ph-student text-xl"></i> Ver como Aluno
                 </button>
             </div>
         </div>
     </header>
 
-    <div id="app" class="max-w-6xl mx-auto px-4 py-10"></div>
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full" id="appContainer">
+        <!-- Content injected by JS -->
+    </main>
 
-    <!-- Modal Senha do Professor -->
     <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl animate-fade-in">
-            <div class="flex flex-col items-center text-center mb-6">
-                <div class="bg-emerald-100 p-4 rounded-full text-emerald-600 mb-4 shadow-inner"><i class="ph-lock-key text-4xl"></i></div>
-                <h2 class="text-2xl font-bold text-slate-800">Acesso Restrito</h2>
-                <p class="text-slate-500 text-sm mt-2">Digite a senha para habilitar a edição.</p>
+        <div class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl animate-fade-in text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 shadow-inner">
+                <i class="ph-lock-key text-3xl font-bold"></i>
             </div>
-            <input type="password" id="adminPasswordInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center text-xl tracking-widest font-mono mb-4 shadow-inner" placeholder="••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Modo Professor</h2>
+            <p class="text-slate-500 text-sm mb-6">Insira a senha para editar os conteúdos.</p>
+            <input type="password" id="adminPassword" placeholder="Senha..." class="w-full text-center px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none mb-4 font-bold tracking-widest text-lg" onkeypress="if(event.key === 'Enter') checkPassword()">
             <div class="flex gap-3">
                 <button onclick="closeAuthModal()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
-                <button onclick="attemptLogin()" class="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md">Entrar</button>
+                <button onclick="checkPassword()" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md">Entrar</button>
             </div>
+            <p class="text-xs text-slate-400 mt-4">Dica: A senha padrão é <b>admin</b></p>
         </div>
     </div>
 
-    <!-- Modal de Configuração IA -->
-    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all">
         <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl animate-fade-in">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="bg-indigo-100 p-3 rounded-2xl text-indigo-600"><i class="ph-robot text-3xl"></i></div>
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Cérebro da IA</h2>
-                    <p class="text-slate-500 text-sm">Google Gemini</p>
-                </div>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="ph-robot text-indigo-600 text-3xl"></i> Configurar IA</h2>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700"><i class="ph-x text-2xl"></i></button>
             </div>
-            <p class="text-slate-600 text-sm mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                Insira sua chave API para permitir a geração automática de aulas e quizzes interativos a partir do texto extraído.
-            </p>
-            <input type="password" id="apiKeyInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none mb-2 font-mono text-sm" placeholder="AIzaSyA...">
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-600 hover:underline mb-6 inline-flex items-center gap-1 font-medium"><i class="ph-link"></i> Obter chave gratuita do Gemini</a>
-            
-            <div class="flex gap-3 mt-4">
-                <button onclick="closeSettings()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
-                <button onclick="saveApiKey()" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md">Salvar</button>
+            <p class="text-slate-500 text-sm mb-6">Para utilizar a geração automática de conteúdo, insira sua chave da API do Google Gemini.</p>
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Chave da API (Gemini)</label>
+                <input type="password" id="apiKeyInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" placeholder="AIzaSy...">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-500 hover:underline mt-2 inline-block"><i class="ph-arrow-square-out"></i> Pegar minha chave gratuita</a>
             </div>
+            <button onclick="saveSettings()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                <i class="ph-floppy-disk text-xl"></i> Salvar Configuração
+            </button>
         </div>
     </div>
 
-    <!-- Modal de Edição -->
-    <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-2 sm:p-4 z-40 backdrop-blur-sm">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl animate-fade-in">
-            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
-                <h2 id="modalTitle" class="text-2xl font-extrabold text-slate-800">Editar Módulo</h2>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-full transition-all"><i class="ph-x text-xl font-bold"></i></button>
-            </div>
-
+    <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-3xl w-full max-w-5xl shadow-2xl animate-fade-in my-8 relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-all"><i class="ph-x text-2xl font-bold"></i></button>
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-6 flex items-center gap-3">
+                <i class="ph-pencil-simple-line text-indigo-600"></i> Editando Módulo
+            </h2>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Título do Módulo</label>
@@ -114,609 +115,723 @@
                     <label class="block text-sm font-bold text-slate-700 mb-2">Descrição Curta</label>
                     <input type="text" id="editDesc" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Ícone (Ex: ph-book)</label>
+                    <input type="text" id="editIcon" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ex: ph-star">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Cor de Fundo (Tema)</label>
+                    <select id="editColor" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="from-cyan-500 to-blue-600">Azul Ciano</option>
+                        <option value="from-green-500 to-emerald-600">Verde Esmeralda</option>
+                        <option value="from-zinc-700 to-black">Preto / Escuro</option>
+                        <option value="from-purple-500 to-pink-600">Roxo / Rosa</option>
+                        <option value="from-orange-500 to-red-600">Laranja / Vermelho</option>
+                        <option value="from-indigo-600 to-violet-700">Índigo / Violeta</option>
+                        <option value="from-amber-400 to-orange-500">Amarelo / Laranja</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Área da IA e PDF -->
-            <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 mb-8">
-                <h3 class="font-bold text-indigo-900 flex items-center gap-2 mb-4 text-lg"><i class="ph-magic-wand text-2xl"></i> Preparação com IA & Material de Apoio</h3>
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-8">
+                <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><i class="ph-magic-wand text-purple-600"></i> Assistente de Inteligência Artificial</h3>
+                <p class="text-slate-500 text-sm mb-4">Envie o material PDF da aula para a IA ler, ou cole o texto base. Ela vai gerar um resumo, exercícios e um quiz interativo formatado automaticamente.</p>
                 
-                <div id="dropArea" class="file-upload-area bg-white rounded-xl p-8 text-center cursor-pointer mb-4 shadow-sm group">
-                    <input type="file" id="fileInput" accept=".pdf" class="hidden">
-                    <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <i class="ph-file-pdf text-3xl text-indigo-600"></i>
+                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                    <div class="flex-1 relative">
+                        <input type="file" id="pdfUploadInput" accept="application/pdf" class="hidden" onchange="handleFileUpload(event)">
+                        <label for="pdfUploadInput" class="w-full h-full min-h-[120px] flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 bg-indigo-50/50 hover:bg-indigo-50 rounded-xl cursor-pointer transition-all text-indigo-700">
+                            <i class="ph-file-pdf text-3xl mb-2"></i>
+                            <span class="font-bold text-sm">1. Anexar PDF da Aula</span>
+                            <span class="text-xs opacity-70 mt-1">(Ele será lido pela IA e mostrado ao aluno)</span>
+                        </label>
                     </div>
-                    <p class="text-slate-700 font-bold text-lg">Clique ou Arraste o arquivo PDF aqui</p>
-                    <p class="text-sm text-slate-500 mt-1">Nós leremos o texto para a IA e anexaremos o arquivo original para o aluno.</p>
+                    <div class="flex-[2]">
+                        <textarea id="aiSourceText" class="w-full h-[120px] px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm resize-none" placeholder="2. O texto do PDF aparecerá aqui para ser lido pela IA. Ou você pode digitar/colar o texto da matéria manualmente se preferir..."></textarea>
+                    </div>
                 </div>
                 
-                <div id="pdfAttachmentContainer" class="hidden flex items-center justify-between bg-white border border-indigo-200 p-4 rounded-xl mb-4 shadow-sm">
-                    <div class="flex items-center gap-3 text-indigo-900 font-semibold truncate">
-                        <i class="ph-check-circle text-emerald-500 text-2xl flex-shrink-0"></i>
-                        <span id="attachedPdfName" class="truncate max-w-[200px] md:max-w-[400px]">arquivo.pdf</span>
-                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md ml-2 flex-shrink-0 hidden sm:inline-block">Será exibido na tela do aluno</span>
+                <div id="pdfAttachmentBadge" class="hidden items-center justify-between bg-white border border-emerald-200 p-3 rounded-lg mb-4 text-emerald-700 text-sm">
+                    <div class="flex items-center gap-2 font-medium">
+                        <i class="ph-check-circle text-xl"></i>
+                        <span id="pdfAttachmentName">arquivo.pdf anexado com sucesso.</span>
                     </div>
-                    <button onclick="removeAttachedPdf()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all flex-shrink-0"><i class="ph-trash text-xl"></i></button>
+                    <button onclick="removePdf()" class="text-red-500 hover:text-red-700 px-2 font-bold text-xs"><i class="ph-trash"></i> Remover</button>
                 </div>
 
-                <div id="quizBadgeContainer" class="hidden mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex justify-between items-center">
-                    <div class="flex items-center gap-2 text-emerald-800 font-bold">
-                        <i class="ph-game-controller text-xl"></i>
-                        <span>Quiz Interativo Configurado</span>
-                    </div>
-                    <span class="text-xs font-bold bg-emerald-200 text-emerald-800 px-2 py-1 rounded-md" id="quizCountBadge">4 perguntas</span>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 mt-6">
-                    <button id="btnGenerateAll" onclick="generateAI('completo')" class="bg-indigo-600 text-white py-3.5 px-4 rounded-xl hover:bg-indigo-700 transition-all font-bold flex items-center justify-center gap-2 shadow-md">
-                        <i class="ph-sparkles text-xl"></i> Gerar Aula + Desafios + Quiz com IA
+                <div class="flex justify-end">
+                    <button id="btnGenerateAI" onclick="generateWithAI()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
+                        <i class="ph-sparkle text-xl"></i> 3. Gerar Aula + Desafios + Quiz com IA
                     </button>
                 </div>
             </div>
 
-            <label class="block text-sm font-bold text-slate-700 mb-2">Conteúdo Base da Aula (O que a IA vai ler e formatar)</label>
-            <textarea id="editContent" class="w-full h-80 p-5 border border-slate-300 rounded-2xl mb-8 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm shadow-inner bg-slate-50" placeholder="O texto extraído do PDF aparecerá aqui. Você também pode digitar manualmente para a IA usar como base..."></textarea>
-            
+            <div class="mb-8">
+                <label class="block text-sm font-bold text-slate-700 mb-2 flex justify-between">
+                    <span>Conteúdo da Aula e Desafios (Markdown)</span>
+                    <span class="text-xs text-slate-400 font-normal border px-2 py-0.5 rounded-md">Editável</span>
+                </label>
+                <textarea id="editContent" class="w-full h-80 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm leading-relaxed" placeholder="## Título...\n\nEscreva ou gere o conteúdo aqui."></textarea>
+            </div>
+
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button onclick="closeModal()" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
-                <button onclick="saveChanges()" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center gap-2">
-                    <i class="ph-floppy-disk text-xl"></i> Salvar Módulo
+                <button id="btnSaveModule" onclick="saveChanges()" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center gap-2">
+                    <i class="ph-cloud-arrow-up text-xl"></i> Salvar Módulo
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Variáveis de Estado
-        let isProfessor = false;
-        let currentView = 'modules';
-        let activeModuleId = null;
-        let apiKey = localStorage.getItem('guia_api_key') || '';
-        const ADMIN_PASSWORD = "admin";
+    <div id="deleteModal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl animate-fade-in text-center">
+            <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 shadow-inner">
+                <i class="ph-warning text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Excluir Módulo?</h2>
+            <p class="text-slate-500 text-sm mb-6">Esta ação apagará o módulo, PDF e quiz.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
+                <button onclick="confirmDelete()" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                    <i class="ph-trash"></i> Sim, Excluir
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // Variáveis Temporárias de Edição
-        let tempPdfData = null;
-        let tempPdfName = null;
-        let tempQuizData = null;
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-3 pointer-events-none"></div>
 
-        // Estado do Quiz Interativo durante o uso
-        let activeQuizData = null;
-        let activeQuizState = {}; 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Dados base (Se o usuário não tiver nada salvo)
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        let app, auth, db;
+        let useFirebase = false;
+        const appId = 'guia_digital_master';
+
+        // Caso deseje conectar um Firebase Real, coloque suas chaves abaixo.
+        // Como estão em branco, o sistema fará fallback automático para o LocalStorage sem gerar erros!
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+
+        if (firebaseConfig.apiKey) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                useFirebase = true;
+            } catch(e) {
+                console.warn("Erro no Firebase, ativando armazenamento local (LocalStorage).");
+            }
+        }
+
+        window.modules = [];
+        window.activeModuleId = null;
+        window.isProfessor = false;
+        
+        window.tempPdfData = null;
+        window.tempPdfName = null;
+        window.tempQuizData = null;
+        window.activeQuizData = null;
+        window.moduleToDelete = null;
+
         const defaultData = [
-            { 
-                id: 'win11', title: 'Windows 11 Descomplicado', desc: 'Domine o sistema e aumente sua produtividade.', 
-                icon: 'ph-windows-logo', color: 'from-cyan-500 to-blue-600', 
-                content: '## 📚 Resumo da Aula\n\nO Windows 11 é o sistema operacional mais moderno da Microsoft, focado em produtividade e design limpo.\n\n### Principais Mudanças:\n- **Menu Iniciar Centralizado:** Mais rápido de acessar.\n- **Snap Layouts:** Organize janelas em grade com um clique.\n\n## 🎯 Desafios Práticos\n1. Fixe seus 3 aplicativos favoritos no Menu Iniciar.\n2. Abra duas janelas e divida a tela meio a meio usando o Snap Layouts.',
-                quizData: [
-                    {
-                        pergunta: "Qual é a principal função visual nova do Menu Iniciar no Windows 11?",
-                        opcoes: ["Ele foi removido", "Ele agora fica centralizado", "Ele é ativado por voz", "Ocupa a tela inteira"],
-                        correta: 1,
-                        justificativa: "A Microsoft centralizou o botão Iniciar para facilitar o acesso em monitores grandes."
-                    }
-                ]
-            },
-            { id: 'office', title: 'Pacote Office Essencial', desc: 'Word, Excel e PowerPoint.', icon: 'ph-microsoft-excel-logo', color: 'from-green-500 to-emerald-600', content: '## Pacote Office\n\nEm construção.' },
-            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis.', icon: 'ph-video', color: 'from-zinc-700 to-black', content: '## CapCut Essencial\n\nEm construção.' },
-            { id: 'ia', title: 'Inteligência Artificial', desc: 'Aprenda a usar IA a seu favor.', icon: 'ph-robot', color: 'from-purple-500 to-pink-600', content: '## Inteligência Artificial\n\nEm construção.' }
+            { id: 'win11', title: 'Windows 11 Descomplicado', desc: 'Domine o sistema e aumente sua produtividade.', icon: 'ph-windows-logo', color: 'from-cyan-500 to-blue-600', order: 0, content: '## 📚 Bem Vindo!\nAqui fica o resumo gerado.' },
+            { id: 'office', title: 'Pacote Office Essencial', desc: 'Word, Excel e PowerPoint na prática.', icon: 'ph-microsoft-excel-logo', color: 'from-green-500 to-emerald-600', order: 1, content: '## Em construção.' },
+            { id: 'capcut', title: 'Edição no CapCut', desc: 'Crie vídeos incríveis para redes sociais.', icon: 'ph-video', color: 'from-zinc-700 to-black', order: 2, content: '## Em construção.' },
+            { id: 'ia', title: 'Inteligência Artificial', desc: 'Aprenda a usar IA a seu favor no dia a dia.', icon: 'ph-robot', color: 'from-purple-500 to-pink-600', order: 3, content: '## Em construção.' }
         ];
 
-        let modules = JSON.parse(localStorage.getItem('guia_modules_data_v3')) || defaultData;
-
-        function saveData() {
-            try {
-                // Tenta salvar no navegador (Limite costuma ser ~5MB)
-                localStorage.setItem('guia_modules_data_v3', JSON.stringify(modules));
-                return true;
-            } catch (e) {
-                console.error(e);
-                showToast("Erro ao salvar! O arquivo PDF é muito pesado para o armazenamento do navegador (Limite ~4MB). Tente um arquivo menor.", "error");
-                return false;
-            }
-        }
-
-        function showToast(message, type = 'success') {
+        window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const styles = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
-            const icon = type === 'success' ? 'ph-check-circle' : (type === 'error' ? 'ph-warning-circle' : 'ph-info');
-            
-            toast.className = `${styles} text-white px-6 py-4 rounded-2xl shadow-xl transform transition-all translate-y-10 opacity-0 flex items-center gap-3 font-bold`;
-            toast.innerHTML = `<i class="${icon} text-2xl"></i> <span>${message}</span>`;
-            
+            toast.className = `toast-enter pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl font-medium text-sm backdrop-blur-md border ${
+                type === 'success' ? 'bg-emerald-50/90 text-emerald-800 border-emerald-100' : 'bg-red-50/90 text-red-800 border-red-100'
+            }`;
+            const icon = type === 'success' ? '<i class="ph-check-circle text-xl text-emerald-600"></i>' : '<i class="ph-warning text-xl text-red-600"></i>';
+            toast.innerHTML = `${icon} <span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 5000);
-        }
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-leave');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        };
 
-        function toggleProfessorMode() {
-            if (!isProfessor) {
-                document.getElementById('adminPasswordInput').value = '';
-                document.getElementById('authModal').classList.remove('hidden');
-                setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+        window.closeSettings = () => document.getElementById('settingsModal').classList.add('hidden');
+        window.closeAuthModal = () => {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        };
+        window.closeModal = () => {
+            document.getElementById('editModal').classList.add('hidden');
+            window.activeModuleId = null;
+        };
+        window.closeDeleteModal = () => {
+            document.getElementById('deleteModal').classList.add('hidden');
+            window.moduleToDelete = null;
+        };
+
+        async function initApp() {
+            // Tenta carregar API key da IA
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if(savedKey) document.getElementById('apiKeyInput').value = savedKey;
+
+            if (useFirebase && auth) {
+                try {
+                    await signInAnonymously(auth);
+                    loadDataFromFirebase();
+                } catch(e) {
+                    console.error("Falha autenticação Firebase", e);
+                    loadDataFromLocalStorage();
+                }
             } else {
-                isProfessor = false; applyModeUI(); showToast("Modo Aluno ativado.", "info");
+                loadDataFromLocalStorage();
             }
         }
 
-        function attemptLogin() {
-            if (document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
-                isProfessor = true; closeAuthModal(); applyModeUI(); showToast("Modo Professor ativado!", "success");
+        function loadDataFromLocalStorage() {
+            const saved = localStorage.getItem('guia_digital_modules_v2');
+            if (saved) {
+                window.modules = JSON.parse(saved).sort((a,b) => (a.order||0) - (b.order||0));
             } else {
-                showToast("Senha incorreta!", "error");
+                window.modules = [...defaultData];
+                saveDataToLocalStorage();
             }
+            window.render();
         }
 
-        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-        function openSettings() { document.getElementById('apiKeyInput').value = apiKey; document.getElementById('settingsModal').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
-        
-        function saveApiKey() {
-            apiKey = document.getElementById('apiKeyInput').value.trim();
-            if (apiKey) { localStorage.setItem('guia_api_key', apiKey); closeSettings(); showToast("Chave IA conectada!", "success"); } 
-            else { showToast("Insira uma chave válida.", "error"); }
-        }
-
-        function applyModeUI() {
-            const btn = document.getElementById('modeToggle');
-            const settingsBtn = document.getElementById('settingsBtn');
-
-            if (isProfessor) {
-                btn.className = "px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold transition-all shadow-md flex items-center gap-2";
-                btn.innerHTML = `<i class="ph-pencil-simple text-lg"></i> <span id="modeText">Modo Professor</span>`;
-                settingsBtn.classList.remove('hidden'); settingsBtn.classList.add('flex');
-            } else {
-                btn.className = "px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold transition-all shadow-md flex items-center gap-2";
-                btn.innerHTML = `<i class="ph-student text-lg"></i> <span id="modeText">Ver como Aluno</span>`;
-                settingsBtn.classList.add('hidden'); settingsBtn.classList.remove('flex');
-            }
-            render();
-        }
-
-        async function callGeminiAPI(promptText) {
-            if (!apiKey) { showToast("A IA não está configurada. Clique na Engrenagem no topo.", "error"); openSettings(); return null; }
-            // Modelo correto e atualizado do Google
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        function saveDataToLocalStorage() {
             try {
-                const response = await fetch(url, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } })
-                });
-                if (!response.ok) throw new Error("Erro na requisição. Verifique sua chave API.");
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
-            } catch (e) { showToast(e.message, "error"); return null; }
-        }
-
-        async function generateAI(tipo) {
-            const material = document.getElementById('editContent').value.trim();
-            if (material.length < 50) { showToast("Você precisa anexar um PDF ou digitar algum texto base para a IA analisar.", "error"); return; }
-
-            const btn = document.getElementById('btnGenerateAll');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<div class="loading-spinner"></div> A IA está processando o conteúdo... (Aguarde)`; btn.disabled = true;
-
-            const prompt = `Você é um Professor Digital Especialista. Analise o texto base e crie o material OBRIGATORIAMENTE usando estas tags EXATAS:
-
-[CONTEUDO_MARKDOWN]
-## 📚 Resumo da Aula
-(tópicos claros, bonitos e diretos baseados no texto)
-## 🎯 Desafios Práticos
-(crie 2 ou 3 desafios aplicáveis e interessantes baseados no assunto)
-[/CONTEUDO_MARKDOWN]
-
-[QUIZ_JSON]
-[
-  {"pergunta": "Questão 1 sobre o texto?", "opcoes": ["A", "B", "C", "D"], "correta": 0, "justificativa": "Motivo educativo e claro da resposta."},
-  {"pergunta": "Questão 2?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "Motivo..."}
-]
-[/QUIZ_JSON]
-
-Texto base: ${material}`;
-
-            const res = await callGeminiAPI(prompt);
-            if (res) {
-                const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
-                const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
-                if (mdStart > 18 && mdEnd !== -1) {
-                    document.getElementById('editContent').value = res.substring(mdStart, mdEnd).trim();
-                }
-                
-                const jStart = res.indexOf('[QUIZ_JSON]') + 11;
-                const jEnd = res.indexOf('[/QUIZ_JSON]');
-                if (jStart > 10 && jEnd !== -1) {
-                    try {
-                        let rawJson = res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim();
-                        tempQuizData = JSON.parse(rawJson);
-                        updateQuizBadge();
-                        showToast("Magia Feita! Aula, Desafios e Quiz gerados com sucesso!", "success");
-                    } catch (e) {
-                        console.error(e); showToast("Erro ao processar o formato do Quiz da IA.", "error");
-                    }
-                }
+                localStorage.setItem('guia_digital_modules_v2', JSON.stringify(window.modules));
+            } catch(e) {
+                window.showToast("Erro de Limite: Você armazenou muito PDF! Limite de 5MB atingido.", "error");
             }
-            btn.innerHTML = originalHTML; btn.disabled = false;
         }
 
-        function setupFileExtraction() {
-            const dropArea = document.getElementById('dropArea');
-            const fileInput = document.getElementById('fileInput');
-            
-            // Clonamos e substituimos para remover listeners antigos (previne disparo duplo)
-            const newDropArea = dropArea.cloneNode(true);
-            dropArea.parentNode.replaceChild(newDropArea, dropArea);
-            const newFileInput = newDropArea.querySelector('#fileInput');
-            
-            newDropArea.onclick = () => newFileInput.click();
-            
-            newDropArea.addEventListener('dragover', (e) => { e.preventDefault(); newDropArea.classList.add('border-indigo-600', 'bg-indigo-50'); });
-            newDropArea.addEventListener('dragleave', (e) => { e.preventDefault(); newDropArea.classList.remove('border-indigo-600', 'bg-indigo-50'); });
-            newDropArea.addEventListener('drop', (e) => {
-                e.preventDefault(); newDropArea.classList.remove('border-indigo-600', 'bg-indigo-50');
-                if (e.dataTransfer.files.length) { newFileInput.files = e.dataTransfer.files; processFile(e.dataTransfer.files[0]); }
+        function loadDataFromFirebase() {
+            const modulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'modules');
+            onSnapshot(modulesRef, (snapshot) => {
+                if (snapshot.empty) {
+                    defaultData.forEach(async (mod) => {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', mod.id), mod);
+                    });
+                } else {
+                    window.modules = snapshot.docs.map(d => d.data()).sort((a,b) => (a.order||0) - (b.order||0));
+                    window.render();
+                }
+            }, (error) => {
+                console.error("Erro Snapshot Firebase:", error);
+                loadDataFromLocalStorage();
             });
-
-            newFileInput.onchange = (e) => { if (e.target.files.length) processFile(e.target.files[0]); };
         }
 
-        async function processFile(file) {
-            showToast("Anexando e Lendo o PDF... Aguarde.", "info");
-            
-            try {
-                // Passo 1: Lê o arquivo em Base64 IMEDIATAMENTE. 
-                // Mesmo que a extração de texto falhe, o PDF estará salvo para visualização.
-                const reader = new FileReader();
-                reader.onload = async (e) => { 
-                    tempPdfData = e.target.result; 
-                    tempPdfName = file.name; 
-                    updatePdfAttachmentUI(); 
-                    
-                    // Passo 2: Tenta extrair o texto via PDF.js
-                    if (file.type === 'application/pdf') {
-                        try {
-                            if (window.pdfjsLib) {
-                                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                                const arrayBuffer = await file.arrayBuffer();
-                                const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                                let text = '';
-                                for (let i = 1; i <= pdf.numPages; i++) {
-                                    const page = await pdf.getPage(i);
-                                    const content = await page.getTextContent();
-                                    text += content.items.map(item => item.str).join(' ') + '\n\n';
-                                }
-                                if (text.trim().length > 0) {
-                                    document.getElementById('editContent').value = text.trim();
-                                    showToast("Arquivo anexado e texto extraído! Agora clique no botão da IA.", "success");
-                                } else {
-                                    showToast("Arquivo anexado! (Não conseguimos ler as letras pois parece ser uma imagem digitalizada)", "info");
-                                }
-                            } else {
-                                showToast("PDF Anexado! (Leitura automática de texto indisponível no momento)", "info");
-                            }
-                        } catch (extError) {
-                            console.error("A extração de texto falhou, mas o arquivo foi anexado:", extError);
-                            showToast("PDF Anexado! (Houve uma falha técnica ao ler o texto automaticamente).", "info");
-                        }
-                    } else {
-                        showToast("Arquivo anexado! Apenas PDFs suportam extração de texto automática.", "success");
-                    }
-                };
-                reader.readAsDataURL(file);
-            } catch (e) { 
-                showToast("Erro inesperado ao processar o arquivo.", "error"); 
-                console.error(e); 
-            }
-            // Limpa o input para permitir enviar o mesmo arquivo de novo se necessário
-            document.getElementById('fileInput').value = '';
-        }
-
-        // Criador de Blob Seguro (Evita bloqueios do Chrome/Edge)
-        function getSafePdfUrl(base64Data) {
-            if (!base64Data || !base64Data.startsWith('data:')) return null;
-            try {
-                const base64 = base64Data.split(',')[1];
-                const byteString = atob(base64);
-                const arrayBuffer = new ArrayBuffer(byteString.length);
-                const int8Array = new Uint8Array(arrayBuffer);
-                for (let i = 0; i < byteString.length; i++) int8Array[i] = byteString.charCodeAt(i);
-                
-                const blob = new Blob([int8Array], { type: 'application/pdf' });
-                return URL.createObjectURL(blob);
-            } catch (e) {
-                console.error("Erro na conversão segura do PDF", e);
-                return null;
-            }
-        }
-
-        function updatePdfAttachmentUI() {
-            const container = document.getElementById('pdfAttachmentContainer');
-            if (tempPdfData) {
-                document.getElementById('attachedPdfName').innerText = tempPdfName;
-                container.classList.remove('hidden'); container.classList.add('flex');
+        window.toggleProfessorMode = function() {
+            if (window.isProfessor) {
+                window.isProfessor = false;
+                document.getElementById('btnToggleProf').innerHTML = '<i class="ph-student text-xl"></i> Ver como Aluno';
+                document.getElementById('btnToggleProf').classList.replace('bg-emerald-600', 'bg-indigo-50');
+                document.getElementById('btnToggleProf').classList.replace('text-white', 'text-indigo-700');
+                document.getElementById('btnToggleProf').classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-100');
+                document.getElementById('btnSettings').classList.add('hidden');
+                window.showToast("Modo Aluno ativado.");
+                window.render();
             } else {
-                container.classList.add('hidden'); container.classList.remove('flex');
+                document.getElementById('authModal').classList.remove('hidden');
+                document.getElementById('adminPassword').focus();
             }
         }
-        
-        function updateQuizBadge() {
-            const container = document.getElementById('quizBadgeContainer');
-            if (tempQuizData && tempQuizData.length > 0) {
-                document.getElementById('quizCountBadge').innerText = `${tempQuizData.length} perguntas`;
-                container.classList.remove('hidden'); container.classList.add('flex');
+
+        window.checkPassword = function() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'admin') {
+                window.isProfessor = true;
+                window.closeAuthModal();
+                document.getElementById('btnToggleProf').innerHTML = '<i class="ph-chalkboard-teacher text-xl"></i> Modo Professor (Ativo)';
+                document.getElementById('btnToggleProf').classList.replace('bg-indigo-50', 'bg-emerald-600');
+                document.getElementById('btnToggleProf').classList.replace('text-indigo-700', 'text-white');
+                document.getElementById('btnToggleProf').classList.replace('hover:bg-indigo-100', 'hover:bg-emerald-700');
+                document.getElementById('btnSettings').classList.remove('hidden');
+                window.showToast("Modo Professor ativado com sucesso!", "success");
+                window.render();
             } else {
-                container.classList.add('hidden'); container.classList.remove('flex');
+                window.showToast("Senha incorreta.", "error");
+                document.getElementById('adminPassword').value = '';
             }
         }
 
-        function removeAttachedPdf() { tempPdfData = null; tempPdfName = null; updatePdfAttachmentUI(); }
+        window.saveSettings = function() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if(key) {
+                localStorage.setItem('gemini_api_key', key);
+                window.showToast("Chave da API Salva!", "success");
+                window.closeSettings();
+            } else {
+                window.showToast("Insira uma chave válida.", "error");
+            }
+        }
 
-        function openEdit(id) {
-            activeModuleId = id;
-            const mod = modules.find(m => m.id === id);
+        window.addNewModule = async function() {
+            if (!window.isProfessor) return;
+            const newId = 'mod_' + Date.now();
+            const nextOrder = window.modules.length > 0 ? Math.max(...window.modules.map(m => m.order || 0)) + 1 : 0;
+            const newModule = { id: newId, title: 'Novo Módulo', desc: 'Configure esta aula...', icon: 'ph-star', color: 'from-amber-400 to-orange-500', content: '## Nova Aula', order: nextOrder };
             
-            document.getElementById('editTitle').value = mod.title;
-            document.getElementById('editDesc').value = mod.desc;
+            if (useFirebase && db) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', newId), newModule);
+            } else {
+                window.modules.push(newModule);
+                saveDataToLocalStorage();
+                window.render();
+            }
+            window.showToast("Módulo criado!", "success");
+        }
+
+        window.moveModule = async function(id, direction) {
+            const currentIndex = window.modules.findIndex(m => m.id === id);
+            if (currentIndex === -1) return;
+            const targetIndex = currentIndex + direction;
+            if (targetIndex < 0 || targetIndex >= window.modules.length) return; 
+
+            const currentMod = window.modules[currentIndex];
+            const targetMod = window.modules[targetIndex];
+            const currentOrder = currentMod.order !== undefined ? currentMod.order : currentIndex;
+            const targetOrder = targetMod.order !== undefined ? targetMod.order : targetIndex;
+
+            currentMod.order = targetOrder;
+            targetMod.order = currentOrder;
+
+            if (useFirebase && db) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', currentMod.id), currentMod);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', targetMod.id), targetMod);
+            } else {
+                saveDataToLocalStorage();
+                window.render();
+            }
+        }
+
+        window.promptDelete = function(id) {
+            window.moduleToDelete = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        window.confirmDelete = async function() {
+            if (!window.isProfessor || !window.moduleToDelete) return;
+            
+            if (useFirebase && db) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', window.moduleToDelete));
+            } else {
+                window.modules = window.modules.filter(m => m.id !== window.moduleToDelete);
+                saveDataToLocalStorage();
+                window.render();
+            }
+            window.showToast("Módulo excluído!", "success");
+            window.closeDeleteModal();
+        }
+
+        window.openEdit = function(id) {
+            window.activeModuleId = id;
+            const mod = window.modules.find(m => m.id === id);
+            
+            document.getElementById('editTitle').value = mod.title || '';
+            document.getElementById('editDesc').value = mod.desc || '';
+            document.getElementById('editIcon').value = mod.icon || 'ph-book';
+            document.getElementById('editColor').value = mod.color || 'from-cyan-500 to-blue-600';
             document.getElementById('editContent').value = mod.content || '';
+            document.getElementById('aiSourceText').value = '';
             
-            tempPdfData = mod.pdfData || null; tempPdfName = mod.pdfName || null;
-            tempQuizData = mod.quizData || null;
-            
-            updatePdfAttachmentUI();
-            updateQuizBadge();
-            
+            window.tempPdfData = mod.pdfData || null; 
+            window.tempPdfName = mod.pdfName || null;
+            window.tempQuizData = mod.quizData || null;
+
+            if (window.tempPdfData) {
+                document.getElementById('pdfAttachmentBadge').classList.remove('hidden');
+                document.getElementById('pdfAttachmentBadge').classList.add('flex');
+                document.getElementById('pdfAttachmentName').innerText = window.tempPdfName;
+            } else {
+                document.getElementById('pdfAttachmentBadge').classList.add('hidden');
+                document.getElementById('pdfAttachmentBadge').classList.remove('flex');
+            }
+
             document.getElementById('editModal').classList.remove('hidden');
-            setupFileExtraction();
         }
 
-        function closeModal() { document.getElementById('editModal').classList.add('hidden'); activeModuleId = null; }
+        window.removePdf = function() {
+            window.tempPdfData = null;
+            window.tempPdfName = null;
+            document.getElementById('pdfAttachmentBadge').classList.add('hidden');
+            document.getElementById('pdfAttachmentBadge').classList.remove('flex');
+            document.getElementById('pdfUploadInput').value = '';
+            window.showToast("PDF removido do anexo.");
+        }
 
-        function saveChanges() {
-            const mod = modules.find(m => m.id === activeModuleId);
-            const backup = { ...mod }; // Guarda os dados originais caso o salvamento falhe
-
+        window.saveChanges = async function() {
+            const modIndex = window.modules.findIndex(m => m.id === window.activeModuleId);
+            if (modIndex === -1) return;
+            
+            const mod = { ...window.modules[modIndex] };
             mod.title = document.getElementById('editTitle').value;
             mod.desc = document.getElementById('editDesc').value;
+            mod.icon = document.getElementById('editIcon').value;
+            mod.color = document.getElementById('editColor').value;
             mod.content = document.getElementById('editContent').value;
-            mod.pdfData = tempPdfData;
-            mod.pdfName = tempPdfName;
-            mod.quizData = tempQuizData;
-
-            if (saveData()) {
-                closeModal(); render(); showToast("Aula atualizada e salva com sucesso!", "success");
-            } else {
-                // Se der erro (ex: PDF muito grande para o LocalStorage), reverte as alterações
-                Object.assign(mod, backup); 
-            }
-        }
-
-        function renderQuizUI() {
-            const container = document.getElementById('quizContainer');
-            if (!container || !activeQuizData) return;
-
-            let html = '<div class="space-y-6 mt-10">';
-            html += '<div class="flex items-center gap-3 mb-6"><div class="bg-indigo-100 p-2 rounded-lg text-indigo-600"><i class="ph-game-controller text-2xl"></i></div><h3 class="text-2xl font-extrabold text-slate-800">Quiz de Fixação</h3></div>';
-
-            activeQuizData.forEach((q, qIndex) => {
-                const state = activeQuizState[qIndex] || {};
-                const answered = state.answered;
-                const isCorrect = state.selected === q.correta;
-
-                let borderClass = 'border-slate-200';
-                if (answered) borderClass = isCorrect ? 'border-emerald-500 bg-emerald-50/30' : 'border-red-500 bg-red-50/30';
-
-                html += `<div class="bg-white p-6 md:p-8 rounded-3xl border-2 ${borderClass} shadow-sm transition-all animate-fade-in relative overflow-hidden">`;
-                html += `<h4 class="text-xl font-bold text-slate-800 mb-6 flex gap-3"><span class="text-indigo-500">${qIndex + 1}.</span> ${q.pergunta}</h4>`;
-                html += `<div class="space-y-3">`;
-
-                q.opcoes.forEach((opt, optIndex) => {
-                    const isSelected = state.selected === optIndex;
-                    const isActuallyCorrect = q.correta === optIndex;
-                    let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center group ";
-
-                    if (!answered) {
-                        btnClass += "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 cursor-pointer font-medium";
-                    } else {
-                        btnClass += "cursor-default ";
-                        if (isActuallyCorrect) btnClass += "bg-emerald-500 border-emerald-500 text-white font-bold shadow-md transform scale-[1.02]";
-                        else if (isSelected && !isCorrect) btnClass += "bg-red-50 border-red-500 text-red-800 font-bold";
-                        else btnClass += "border-slate-100 text-slate-400 opacity-60";
-                    }
-
-                    html += `<button ${!answered ? `onclick="answerQuestion(${qIndex}, ${optIndex})"` : 'disabled'} class="${btnClass}">`;
-                    html += `<span>${opt}</span>`;
-                    if (!answered) { html += `<div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-400 flex-shrink-0"></div>`; } 
-                    else {
-                        if (isActuallyCorrect) html += `<i class="ph-check-circle text-2xl text-white"></i>`;
-                        else if (isSelected && !isCorrect) html += `<i class="ph-x-circle text-2xl text-red-600"></i>`;
-                    }
-                    html += `</button>`;
-                });
-                html += `</div>`;
-
-                if (answered) {
-                    html += `<div class="mt-6 p-5 rounded-2xl ${isCorrect ? 'bg-emerald-100/50 border border-emerald-200 text-emerald-900' : 'bg-red-100/50 border border-red-200 text-red-900'} animate-fade-in flex gap-4 items-start">`;
-                    html += `<i class="${isCorrect ? 'ph-check-circle text-emerald-600' : 'ph-info text-red-600'} text-3xl shrink-0"></i>`;
-                    html += `<div><p class="font-bold text-lg mb-1">${isCorrect ? 'Excelente! Resposta Certa.' : 'Puxa, resposta incorreta.'}</p><p class="text-base leading-relaxed">${q.justificativa}</p></div>`;
-                    html += `</div>`;
-                }
-                html += `</div>`;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        window.answerQuestion = function(qIndex, optIndex) {
-            activeQuizState[qIndex] = { answered: true, selected: optIndex };
-            renderQuizUI();
-        }
-
-        // Gera novos desafios pelo aluno
-        async function generateNewPractice() {
-            if (!apiKey) { showToast("O Professor não habilitou a IA ainda.", "error"); return; }
             
-            const btn = document.getElementById('btnPraticarMais');
-            btn.innerHTML = `<div class="loading-spinner"></div> Criando desafios...`; btn.disabled = true;
+            if (window.tempPdfData !== null) mod.pdfData = window.tempPdfData;
+            if (window.tempPdfName !== null) mod.pdfName = window.tempPdfName;
+            if (window.tempQuizData !== null) mod.quizData = window.tempQuizData;
 
-            const mod = modules.find(m => m.id === activeModuleId);
-            const prompt = `Analise a aula e crie NOVOS desafios e um NOVO quiz inédito. Siga EXATAMENTE as tags:
-[CONTEUDO_MARKDOWN]
-## 🚀 Novos Desafios Práticos (Criados por IA)
-(2 novos desafios)
-[/CONTEUDO_MARKDOWN]
-[QUIZ_JSON]
-[ {"pergunta": "Nova questao?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "..."} ]
-[/QUIZ_JSON]
-Texto Base: ${mod.content.substring(0, 3000)}`;
+            const btn = document.getElementById('btnSaveModule');
+            btn.innerHTML = '<div class="loading-spinner"></div> Salvando...';
 
-            const res = await callGeminiAPI(prompt);
-            if (res) {
-                const mdStart = res.indexOf('[CONTEUDO_MARKDOWN]') + 19;
-                const mdEnd = res.indexOf('[/CONTEUDO_MARKDOWN]');
-                if (mdStart > 18 && mdEnd !== -1) document.getElementById('extraPracticeContent').innerHTML = marked.parse(res.substring(mdStart, mdEnd).trim());
+            try {
+                if (useFirebase && db) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'modules', mod.id), mod);
+                } else {
+                    window.modules[modIndex] = mod;
+                    saveDataToLocalStorage();
+                    window.render();
+                }
+                window.showToast("Módulo salvo com sucesso!", "success");
+                window.closeModal();
+            } catch(e) {
+                console.error(e);
+                window.showToast("Erro ao salvar. Verifique se o PDF não é muito grande (Máx ~1MB no Firebase).", "error");
                 
-                const jStart = res.indexOf('[QUIZ_JSON]') + 11;
-                const jEnd = res.indexOf('[/QUIZ_JSON]');
-                if (jStart > 10 && jEnd !== -1) {
-                    try {
-                        activeQuizData = JSON.parse(res.substring(jStart, jEnd).replace(/```json/g, '').replace(/```/g, '').trim());
-                        activeQuizState = {}; 
-                        renderQuizUI();
-                        showToast("Novos exercícios gerados!", "success");
-                    } catch (e) {}
+                // Fallback de salvamento local forçado em caso de estouro de DB
+                if (String(e).includes('large') || String(e).includes('resource-exhausted')) {
+                     window.modules[modIndex] = mod;
+                     saveDataToLocalStorage();
+                     window.closeModal();
+                     window.render();
                 }
+            } finally {
+                btn.innerHTML = '<i class="ph-cloud-arrow-up text-xl"></i> Salvar Módulo';
             }
-            btn.innerHTML = `<i class="ph-arrows-clockwise text-xl"></i> Gerar Outro Treino (IA)`; btn.disabled = false;
         }
 
-        function openModule(id) {
-            activeModuleId = id; currentView = 'module';
-            const mod = modules.find(m => m.id === id);
-            activeQuizData = mod.quizData ? JSON.parse(JSON.stringify(mod.quizData)) : null;
-            activeQuizState = {};
-            render();
-        }
+        window.handleFileUpload = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        function render() {
-            const app = document.getElementById('app');
+            if (file.size > 2000000) { 
+                window.showToast("Aviso: PDFs maiores que 2MB podem não salvar na nuvem e ficarão apenas locais.", "error");
+            }
+
+            window.showToast("Lendo PDF...", "success");
             
-            if (currentView === 'modules') {
-                app.innerHTML = `
-                    <div class="text-center max-w-2xl mx-auto mb-12">
-                        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">O que vamos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">aprender hoje?</span></h2>
-                        <p class="text-slate-500 text-lg">Selecione uma trilha e evolua suas habilidades digitais.</p>
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const base64Data = event.target.result;
+                window.tempPdfData = base64Data;
+                window.tempPdfName = file.name;
+                
+                document.getElementById('pdfAttachmentBadge').classList.remove('hidden');
+                document.getElementById('pdfAttachmentBadge').classList.add('flex');
+                document.getElementById('pdfAttachmentName').innerText = file.name;
+
+                // Extract Text for AI
+                try {
+                    const pdfDataArray = atob(base64Data.split(',')[1]);
+                    if (window.pdfjsLib) {
+                        const loadingTask = window.pdfjsLib.getDocument({data: pdfDataArray});
+                        const pdf = await loadingTask.promise;
+                        let fullText = '';
+                        for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                        }
+                        document.getElementById('aiSourceText').value = fullText;
+                        window.showToast("Texto extraído com sucesso para a IA!");
+                    }
+                } catch(error) {
+                    console.error("Erro ao ler texto do PDF: ", error);
+                    window.showToast("PDF anexado! Mas como é escaneado, digite o resumo manualmente.", "error");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.getPdfViewerHTML = function(pdfData, pdfName) {
+            if (!pdfData) return '';
+            return `
+                <div class="mb-10 bg-slate-50 p-2 rounded-3xl border border-slate-200 shadow-sm relative z-10">
+                    <div class="bg-slate-800 rounded-t-2xl py-3 px-5 flex items-center justify-between text-white">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-file-pdf text-red-400 text-2xl"></i>
+                            <span class="font-medium font-sm truncate max-w-[200px] md:max-w-md">${pdfName || 'Material de Apoio'}</span>
+                        </div>
+                        <a href="${pdfData}" download="${pdfName || 'material.pdf'}" class="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
+                            <i class="ph-download-simple"></i> Baixar
+                        </a>
+                    </div>
+                    <div class="w-full h-[600px] rounded-b-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative">
+                        <object data="${pdfData}" type="application/pdf" width="100%" height="100%" class="absolute inset-0 z-10">
+                            <iframe src="${pdfData}" width="100%" height="100%" class="border-0 absolute inset-0">
+                                <div class="p-8 text-center mt-20 text-slate-500">
+                                    <i class="ph-warning text-4xl mb-3 text-amber-500"></i><br>
+                                    Navegador bloqueou a visualização direta.<br><br>
+                                    <a href="${pdfData}" download="${pdfName}" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl inline-block mt-4 hover:bg-indigo-700 shadow-lg">Clique Aqui para Baixar o Arquivo PDF</a>
+                                </div>
+                            </iframe>
+                        </object>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.generateWithAI = async function() {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                document.getElementById('settingsModal').classList.remove('hidden');
+                window.showToast("Insira sua Chave API do Gemini primeiro.", "error");
+                return;
+            }
+
+            const text = document.getElementById('aiSourceText').value;
+            if (!text || text.length < 20) {
+                window.showToast("Insira ou extraia um texto maior primeiro.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnGenerateAI');
+            btn.innerHTML = '<div class="loading-spinner"></div> Pensando...';
+            btn.disabled = true;
+
+            const prompt = `Atue como professor. Leia o texto e crie: 1) Um resumo 2) Desafio prático. Formate em Markdown. Também gere um array JSON 'quizData' com 2 perguntas de múltipla escolha.
+            
+Formato EXATO de Saída JSON obrigatório:
+{
+    "content": "## Resumo\\nTexto em markdown aqui.\\n\\n## Desafio Prático\\nSeu desafio.",
+    "quizData": [
+        { "pergunta": "Pergunta 1?", "opcoes": ["A", "B", "C", "D"], "correta": 0, "justificativa": "Motivo da correta." },
+        { "pergunta": "Pergunta 2?", "opcoes": ["A", "B", "C", "D"], "correta": 1, "justificativa": "Motivo da correta." }
+    ]
+}
+
+Texto Base:
+${text.substring(0, 30000)}`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!response.ok) throw new Error("Erro na API.");
+                const data = await response.json();
+                const aiText = data.candidates[0].content.parts[0].text;
+                
+                const match = aiText.match(/```json([\s\S]*?)```/) || aiText.match(/{[\s\S]*}/);
+                if (match) {
+                    const parsed = JSON.parse(match[1] || match[0]);
+                    document.getElementById('editContent').value = parsed.content;
+                    window.tempQuizData = parsed.quizData;
+                    window.showToast("Material gerado com sucesso!", "success");
+                } else {
+                    throw new Error("JSON não encontrado.");
+                }
+            } catch(e) {
+                console.error(e);
+                window.showToast("Falha ao gerar. Verifique sua chave API.", "error");
+            } finally {
+                btn.innerHTML = '<i class="ph-sparkle text-xl"></i> 3. Gerar Aula + Desafios + Quiz com IA';
+                btn.disabled = false;
+            }
+        }
+
+        window.checkAnswer = function(questionIndex, selectedIndex, btnEl) {
+            if (!window.activeQuizData) return;
+            const quiz = window.activeQuizData[questionIndex];
+            const isCorrect = selectedIndex === quiz.correta;
+            
+            const container = btnEl.closest('.bg-white');
+            const buttons = container.querySelectorAll('button.text-left');
+            
+            buttons.forEach((b, idx) => {
+                b.disabled = true;
+                b.classList.remove('hover:bg-indigo-50', 'hover:border-indigo-200');
+                if (idx === quiz.correta) {
+                    b.classList.remove('border-slate-200');
+                    b.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'font-bold');
+                    b.innerHTML = `<i class="ph-check-circle text-xl"></i> ` + b.innerText;
+                } else if (idx === selectedIndex && !isCorrect) {
+                    b.classList.remove('border-slate-200');
+                    b.classList.add('bg-red-500', 'text-white', 'border-red-600', 'font-bold');
+                    b.innerHTML = `<i class="ph-x-circle text-xl"></i> ` + b.innerText;
+                } else {
+                    b.classList.add('opacity-40');
+                }
+            });
+
+            const fb = container.querySelector('.feedback-box');
+            fb.classList.remove('hidden');
+            fb.innerHTML = `
+                <div class="p-4 mt-4 rounded-xl flex items-start gap-3 ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-red-50 text-red-800 border border-red-100'}">
+                    <i class="${isCorrect ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-red-600'} text-2xl mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold">${isCorrect ? 'Correto!' : 'Incorreto.'}</h4>
+                        <p class="text-sm mt-1 opacity-90">${quiz.justificativa || 'Excelente escolha!'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.openModule = (id) => { window.activeModuleId = id; window.render(); window.scrollTo(0,0); }
+        window.goBack = () => { window.activeModuleId = null; window.render(); window.scrollTo(0,0); }
+
+        window.render = function() {
+            const container = document.getElementById('appContainer');
+            let html = '';
+
+            if (!window.activeModuleId) {
+                // RENDER DASHBOARD
+                html += `
+                    <div class="text-center max-w-2xl mx-auto mb-12 animate-fade-in">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">Trilhas de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">Conhecimento</span></h2>
+                        <p class="text-slate-500 text-lg">Selecione um módulo para iniciar seus estudos.</p>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                        ${modules.map(m => `
-                            <div class="bg-white rounded-3xl p-8 card-shadow border border-slate-100 relative group hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${m.color} opacity-10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
-                                
-                                ${isProfessor ? `
-                                    <button onclick="openEdit('${m.id}')" class="absolute top-6 right-6 bg-amber-400 hover:bg-amber-500 text-amber-900 p-3 rounded-xl shadow-lg transition-all z-10 flex items-center gap-2 font-bold" title="Editar Aula">
-                                        <i class="ph-pencil-simple text-xl"></i> Editar
-                                    </button>
-                                ` : ''}
-                                
-                                <div class="w-16 h-16 bg-gradient-to-br ${m.color} rounded-2xl flex items-center justify-center mb-6 shadow-md text-white group-hover:scale-110 transition-transform">
-                                    <i class="${m.icon} text-3xl"></i>
-                                </div>
-                                <h3 class="text-2xl font-bold text-slate-800 mb-3">${m.title}</h3>
-                                <p class="text-slate-500 mb-8 text-lg">${m.desc}</p>
-                                <button onclick="openModule('${m.id}')" class="w-full py-4 bg-slate-50 text-indigo-600 font-bold text-lg rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all border border-indigo-100 flex items-center justify-center gap-3">
-                                    Acessar Módulo <i class="ph-arrow-right font-bold text-xl"></i>
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
                 `;
-            } else {
-                const mod = modules.find(m => m.id === activeModuleId);
-                const parsedContent = marked.parse(mod.content || "Nenhum conteúdo disponível.");
-                const safePdfUrl = mod.pdfData ? getSafePdfUrl(mod.pdfData) : null;
-                
-                app.innerHTML = `
-                    <button onclick="currentView='modules'; render();" class="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-8 font-bold transition-all bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 w-fit">
-                        <i class="ph-arrow-left text-xl"></i> Voltar ao Painel
-                    </button>
-                    
-                    <div class="bg-white rounded-[2rem] border border-slate-200 card-shadow overflow-hidden">
-                        <div class="bg-gradient-to-br ${mod.color} p-10 md:p-14 text-white relative overflow-hidden">
-                            <div class="absolute -right-10 -bottom-10 opacity-20 transform rotate-12 pointer-events-none"><i class="${mod.icon} text-[15rem]"></i></div>
-                            <div class="relative z-10">
-                                <div class="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/30 shadow-xl">
-                                    <i class="${mod.icon} text-5xl"></i>
-                                </div>
-                                <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight drop-shadow-md">${mod.title}</h2>
-                                <p class="text-white/90 text-xl font-medium max-w-2xl">${mod.desc}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="p-8 md:p-14 bg-white module-content">
-                            <!-- Visualizador de PDF Multi-Plataforma -->
-                            ${safePdfUrl ? `
-                                <div class="mb-14 bg-slate-50 p-3 md:p-5 rounded-[2rem] border border-slate-200 shadow-inner">
-                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 px-2">
-                                        <div class="flex items-center gap-3">
-                                            <div class="bg-red-500 p-2.5 rounded-xl text-white shadow-md"><i class="ph-file-pdf text-2xl"></i></div> 
-                                            <div>
-                                                <h3 class="!m-0 text-xl font-extrabold text-slate-800">Material Original (PDF)</h3>
-                                                <p class="text-sm text-slate-500 m-0">${mod.pdfName || 'Documento da Aula'}</p>
-                                            </div>
-                                        </div>
-                                        <a href="${safePdfUrl}" download="${mod.pdfName || 'Material_Guia_Digital'}.pdf" class="bg-white hover:bg-slate-100 text-slate-700 font-bold py-2.5 px-4 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2 transition-all text-sm w-full sm:w-auto justify-center">
-                                            <i class="ph-download-simple text-lg"></i> Baixar Arquivo
-                                        </a>
-                                    </div>
-                                    
-                                    <!-- Fallback Seguro: Se a tag object falhar, mostra o iframe. Se ambos falharem, mostra o aviso. -->
-                                    <div class="rounded-2xl overflow-hidden shadow-md border border-slate-300 bg-slate-800 w-full" style="height: 65vh; min-height: 500px;">
-                                        <object data="${safePdfUrl}#view=FitH&toolbar=0" type="application/pdf" class="w-full h-full">
-                                            <iframe src="${safePdfUrl}#view=FitH&toolbar=0" class="w-full h-full border-0">
-                                                <div class="flex flex-col items-center justify-center h-full p-8 text-center text-white bg-slate-800">
-                                                    <i class="ph-warning-circle text-6xl mb-4 text-amber-400"></i>
-                                                    <h4 class="text-2xl font-bold mb-2">Visualização Bloqueada</h4>
-                                                    <p class="text-slate-300 mb-6 max-w-md">Seu navegador atual de celular/computador não permite visualizar o PDF diretamente nesta página.</p>
-                                                    <a href="${safePdfUrl}" download="${mod.pdfName || 'Material'}.pdf" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all flex items-center gap-3 text-lg">
-                                                        <i class="ph-download-simple text-2xl"></i> Clique aqui para Baixar o PDF
-                                                    </a>
-                                                </div>
-                                            </iframe>
-                                        </object>
-                                    </div>
+
+                window.modules.forEach((m, index) => {
+                    html += `
+                        <div class="bg-white rounded-3xl p-8 card-shadow border border-slate-100 relative group transition-all duration-300 overflow-hidden ${window.isProfessor ? '' : 'hover:-translate-y-2 cursor-pointer'}" ${!window.isProfessor ? `onclick="openModule('${m.id}')"` : ''}>
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${m.color} opacity-10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                            
+                            ${window.isProfessor ? `
+                                <div class="absolute top-4 right-4 flex gap-1.5 z-10 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl shadow-sm border border-slate-100/50">
+                                    <button onclick="event.stopPropagation(); moveModule('${m.id}', -1)" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 bg-white rounded-xl shadow-sm transition-all ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}" title="Subir"><i class="ph-caret-left font-bold"></i></button>
+                                    <button onclick="event.stopPropagation(); moveModule('${m.id}', 1)" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 bg-white rounded-xl shadow-sm transition-all ${index === window.modules.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" title="Descer"><i class="ph-caret-right font-bold"></i></button>
+                                    <div class="w-px bg-slate-200 mx-0.5 my-1"></div>
+                                    <button onclick="event.stopPropagation(); openEdit('${m.id}')" class="w-8 h-8 flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 bg-white rounded-xl shadow-sm transition-all" title="Editar"><i class="ph-pencil-simple font-bold"></i></button>
+                                    <button onclick="event.stopPropagation(); promptDelete('${m.id}')" class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 bg-white rounded-xl shadow-sm transition-all" title="Excluir"><i class="ph-trash font-bold"></i></button>
                                 </div>
                             ` : ''}
-
-                            <!-- Conteúdo Markdown Base -->
-                            <div class="prose max-w-none mb-10">${parsedContent}</div>
                             
-                            <!-- Área de Treino Extra -->
-                            <div id="extraPracticeContent" class="mt-8 prose max-w-none"></div>
-
-                            <!-- Container do Quiz Interativo -->
-                            <div id="quizContainer"></div>
-
-                            <!-- Botão de Prática Extra Aluno -->
-                            <div class="mt-16 pt-10 border-t border-slate-200 text-center">
-                                <div class="bg-indigo-50 rounded-[2rem] p-8 md:p-10 border border-indigo-100 max-w-3xl mx-auto relative overflow-hidden">
-                                    <div class="absolute -right-4 -top-4 opacity-10 text-indigo-500"><i class="ph-sparkles text-[10rem]"></i></div>
-                                    <h4 class="text-2xl font-bold text-indigo-900 mb-3 relative z-10">Desafie a Inteligência Artificial</h4>
-                                    <p class="text-indigo-700 mb-8 text-lg relative z-10">Nossa IA criará um desafio prático e um quiz inédito baseado exatamente no que você acabou de ler nesta aula.</p>
-                                    <button id="btnPraticarMais" onclick="generateNewPractice()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3 mx-auto w-full sm:w-auto relative z-10 text-lg">
-                                        <i class="ph-sparkles text-2xl"></i> Praticar Mais com IA
-                                    </button>
+                            <div class="w-16 h-16 bg-gradient-to-br ${m.color} rounded-2xl flex items-center justify-center mb-6 shadow-md text-white group-hover:scale-110 transition-transform mt-4">
+                                <i class="${m.icon} text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-3">${m.title}</h3>
+                            <p class="text-slate-500 mb-8 text-lg pr-2">${m.desc}</p>
+                            
+                            ${window.isProfessor ? `
+                                <button onclick="openModule('${m.id}')" class="w-full py-3 bg-slate-50 text-indigo-600 font-bold rounded-xl border border-indigo-100 flex items-center justify-center gap-2 hover:bg-indigo-50 transition-all">
+                                    Visualizar como Aluno <i class="ph-eye"></i>
+                                </button>
+                            ` : `
+                                <div class="w-full py-4 bg-slate-50 text-indigo-600 font-bold text-lg rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all border border-indigo-100 flex items-center justify-center gap-3 shadow-sm">
+                                    Acessar Módulo <i class="ph-arrow-right font-bold text-xl"></i>
                                 </div>
+                            `}
+                        </div>
+                    `;
+                });
+
+                if (window.isProfessor) {
+                    html += `
+                        <div onclick="addNewModule()" class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-3xl p-8 flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition-all min-h-[300px] group">
+                            <div class="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:border-indigo-200">
+                                <i class="ph-plus text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-600">Criar Novo Módulo</h3>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            } else {
+                // RENDER SPECIFIC MODULE
+                const mod = window.modules.find(m => m.id === window.activeModuleId);
+                if(!mod) { goBack(); return; }
+
+                window.activeQuizData = mod.quizData;
+
+                html += `
+                    <div class="animate-fade-in">
+                        <button onclick="goBack()" class="mb-8 px-5 py-2.5 bg-white text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl shadow-sm border border-slate-200 transition-all flex items-center gap-2">
+                            <i class="ph-arrow-left text-xl"></i> Voltar ao Início
+                        </button>
+                        
+                        <div class="bg-white rounded-3xl overflow-hidden card-shadow border border-slate-100 mb-10">
+                            <div class="bg-gradient-to-r ${mod.color} p-10 text-white relative">
+                                <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-bl-full -z-1"></div>
+                                <div class="relative z-10 flex items-center gap-6">
+                                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
+                                        <i class="${mod.icon} text-5xl"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-4xl font-extrabold tracking-tight mb-2">${mod.title}</h2>
+                                        <p class="text-white/80 text-lg">${mod.desc}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6 md:p-12">
+                                ${window.getPdfViewerHTML(mod.pdfData, mod.pdfName)}
+                            
+                                <div class="prose max-w-none text-slate-700 bg-slate-50 p-8 rounded-3xl border border-slate-100 mb-10 shadow-inner">
+                                    ${marked.parse(mod.content)}
+                                </div>
+                                
+                                ${mod.quizData && mod.quizData.length > 0 ? `
+                                    <div class="border-t-2 border-dashed border-slate-200 pt-10">
+                                        <div class="flex items-center gap-3 mb-8">
+                                            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center shadow-inner">
+                                                <i class="ph-game-controller text-2xl font-bold"></i>
+                                            </div>
+                                            <h3 class="text-2xl font-extrabold text-slate-800">Quiz de Fixação</h3>
+                                        </div>
+                                        <div class="space-y-6">
+                                            ${mod.quizData.map((q, idx) => `
+                                                <div class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
+                                                    <p class="font-bold text-lg text-slate-800 mb-5 flex gap-3">
+                                                        <span class="text-purple-600">${idx + 1}.</span> ${q.pergunta}
+                                                    </p>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        ${q.opcoes.map((op, opIdx) => `
+                                                            <button onclick="checkAnswer(${idx}, ${opIdx}, this)" class="text-left w-full px-5 py-4 rounded-xl border border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-all flex items-center gap-3 bg-white">
+                                                                <div class="w-6 h-6 rounded-full border-2 border-current flex-shrink-0 flex items-center justify-center text-xs font-bold">${['A','B','C','D'][opIdx]}</div>
+                                                                ${op}
+                                                            </button>
+                                                        `).join('')}
+                                                    </div>
+                                                    <div class="feedback-box hidden mt-4"></div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
                 `;
-                if (activeQuizData) renderQuizUI();
             }
+            container.innerHTML = html;
         }
 
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeSettings(); closeAuthModal(); } });
+        window.onload = initApp;
+        
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'Escape') { 
+                window.closeModal(); 
+                window.closeSettings(); 
+                window.closeAuthModal(); 
+                window.closeDeleteModal(); 
+            } 
+        });
+        
         marked.setOptions({ breaks: true, gfm: true });
-        render();
     </script>
 </body>
 </html>
